@@ -13,10 +13,12 @@ pimsclient
         :target: https://pimsclient.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-
 .. image:: https://pyup.io/repos/github/sjoerdk/pimsclient/shield.svg
      :target: https://pyup.io/repos/github/sjoerdk/pimsclient/
      :alt: Updates
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
 
 
 
