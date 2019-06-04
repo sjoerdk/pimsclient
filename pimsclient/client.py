@@ -11,7 +11,6 @@ single project description
 
 
 class Identifier:
-
     def __init__(self, value, source):
         """A real patientID, StudyInstance or the like, with a source
 
@@ -29,8 +28,7 @@ class Identifier:
         return f"Identifier '{self.value}' (source:'{self.source}')"
 
     def to_dict(self):
-        return {'identifier': self.value,
-                'identity_source': self.source}
+        return {"identifier": self.value, "identity_source": self.source}
 
 
 class Pseudonym:
@@ -49,7 +47,6 @@ class Pseudonym:
 
 
 class Key:
-
     def __init__(self, identifier, pseudonym):
         """Combines an identifier with a pseudonym. The main constituent of a key file
 
@@ -77,8 +74,10 @@ class Key:
         -------
         Key
         """
-        return cls(identifier=Identifier(value=identity, source=identity_source),
-                   pseudonym=Pseudonym(value=pseudonym))
+        return cls(
+            identifier=Identifier(value=identity, source=identity_source),
+            pseudonym=Pseudonym(value=pseudonym),
+        )
 
     def __str__(self):
-        return f'Key {self.pseudonym.value}'
+        return f"Key {self.pseudonym.value}"

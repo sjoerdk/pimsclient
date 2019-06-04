@@ -9,40 +9,39 @@ from pimsclient.swagger import User, KeyFile
 
 
 class UserFactory(factory.Factory):
-
     class Meta:
         model = User
 
-    key = factory.Sequence(lambda n: f'{n}')
-    name = factory.Faker('first_name')
-    email = factory.LazyAttribute(lambda a: f'{a.name}@radboudumc.nl'.lower())
+    key = factory.Sequence(lambda n: f"{n}")
+    name = factory.Faker("first_name")
+    email = factory.LazyAttribute(lambda a: f"{a.name}@radboudumc.nl".lower())
+    role = "TEST_ROLE"
 
 
 class KeyFileFactory(factory.Factory):
-
     class Meta:
         model = KeyFile
 
-    key = factory.Sequence(lambda n: f'{n}')
-    name = factory.Faker('first_name')
-    description = factory.Faker('sentence', nb_words=8)
-    pseudonym_template = factory.Faker('sentence', ext_word_list=['S8|', 'text|', 'ID#|'])
+    key = factory.Sequence(lambda n: f"{n}")
+    name = factory.Faker("first_name")
+    description = factory.Faker("sentence", nb_words=8)
+    pseudonym_template = factory.Faker(
+        "sentence", ext_word_list=["S8|", "text|", "ID#|"]
+    )
 
 
 class PseudonymFactory(factory.Factory):
-
     class Meta:
         model = Pseudonym
 
-    value = factory.Sequence(lambda n: f'pseudonym{n}')
+    value = factory.Sequence(lambda n: f"pseudonym{n}")
 
 
 class IdentifierFactory(factory.Factory):
-
     class Meta:
         model = Identifier
 
-    value = factory.Faker('first_name')
+    value = factory.Faker("first_name")
     source = "generated_by_factory"
 
 
@@ -109,47 +108,68 @@ class RequestsMockResponseExamples:
 
     """
 
-    KEYFILE_DOES_NOT_EXIST = (
-        (404, r': "Keyfile does not exist (anymore)"')
-    )
+    KEYFILE_DOES_NOT_EXIST = (404, r': "Keyfile does not exist (anymore)"')
+
+    UNAUTHORIZED = (401, r"Unauthorized, your credentials do not work here")
 
     ACTION_REFUSED_INSUFFICIENT_RIGHTS = (
-        (403, r'Action refused due to insufficient rights: Test message')
+        403,
+        r"Action refused due to insufficient rights: Test message",
     )
 
     REQUESTED_RESOURCE_DOES_NOT_SUPPORT = (
-        (405, r'{Message":"The requested resource does not support http method \'GET\'}')
+        405,
+        r'{Message":"The requested resource does not support http method \'GET\'}',
     )
 
     UKNOWN_URL = (
-        (404, r'"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" '
-              r'"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> \
-              <h2>404 - File or directory not found.</h2>"')
+        404,
+        r'"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" '
+        r'"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> \
+              <h2>404 - File or directory not found.</h2>"',
     )
 
     KEYFILES_FORUSER_RESPONSE = (
-        (200, '{ "Count": 0, "Page": 0, "PageSize": 0, "PageCount": 0, "Data": [ '
-              '{ "CreationDate": "2019-05-29T11:32:09.723Z", "SequenceNumber": 0, '
-              '"Name": "string", "Description": "string", "PseudonymTemplate": "string", '
-              '"KeyfileKey": 0, "Deleted": true, "WorkspaceID": "string" } ] }')
+        200,
+        '{ "Count": 0, "Page": 0, "PageSize": 0, "PageCount": 0, "Data": [ '
+        '{ "CreationDate": "2019-05-29T11:32:09.723Z", "SequenceNumber": 0, '
+        '"Name": "string", "Description": "string", "PseudonymTemplate": "string", '
+        '"KeyfileKey": 0, "Deleted": true, "WorkspaceID": "string" } ] }',
     )
 
     KEYFILES_RESPONSE = (
-        (200, '{ "CreationDate": "2019-05-29T11:32:09.735Z", "SequenceNumber": 0, "Name": "string", '
-              '"Description": "string", "PseudonymTemplate": "string", "KeyfileKey": 0, "Deleted": true,'
-              '"WorkspaceID": "string" }')
+        200,
+        '{ "CreationDate": "2019-05-29T11:32:09.735Z", "SequenceNumber": 0, "Name": "string", '
+        '"Description": "string", "PseudonymTemplate": "string", "KeyfileKey": 0, "Deleted": true,'
+        '"WorkspaceID": "string" }',
     )
 
-    KEYFILES_PSEUDONYMS_POST_RESPONSE = (  # response to successful post to Keyfiles/{keyfile.key}/Pseudonyms
-        (201, '{"PseudonymLnkKey":167033,"KeyfileKey":26,"Pseudonym":"63bf2309-d280-44d0-914b-a74a25dfc56d",'
-              '"Deleted":false,"Identifier":"Henk_Sjansen2","IdentitySource":"sjoerd_zelf"}')
+    KEYFILES_PSEUDONYMS_POST_RESPONSE = (  # response to successful post to Keyfiles/{KeyfileKey}/Pseudonyms
+        201,
+        '{"PseudonymLnkKey":167033,"KeyfileKey":26,"Pseudonym":"63bf2309-d280-44d0-914b-a74a25dfc56d",'
+        '"Deleted":false,"Identifier":"Henk_Sjansen2","IdentitySource":"sjoerd_zelf"}',
     )
 
-    KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE = (   # response after succesful re-identify of 2 pseudonyms
-        (200, '{"Count":2,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"Pseudonyms","Type":null,'
-              '"Keys":[166741,166742],"Action":4,"Values":["e09234165-218c-46cc-8e2a-2d0da1836abd",'
-              '"9693340a80-dccf-4444-86ab-9762aab9d623"]},{"Name":"Identity","Type":["Identity","Identity"],'
-              '"Keys":[166741,166742],"Action":4,"Values":["sjoerd_kerkstra","secret"]},{"Name":"Identity Source",'
-              '"Type":["IdentitySource","IdentitySource"],"Keys":[166741,166742],"Action":4,"Values":["sjoerd_zelf",'
-              '"sjoerd_test_source"]}]}')
+    KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE = (  # response after successful re-identify of 2 pseudonyms
+        200,
+        '{"Count":2,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"Pseudonyms","Type":null,'
+        '"Keys":[166741,166742],"Action":4,"Values":["e09234165-218c-46cc-8e2a-2d0da1836abd",'
+        '"9693340a80-dccf-4444-86ab-9762aab9d623"]},{"Name":"Identity","Type":["Identity","Identity"],'
+        '"Keys":[166741,166742],"Action":4,"Values":["sjoerd_kerkstra","secret"]},{"Name":"Identity Source",'
+        '"Type":["IdentitySource","IdentitySource"],"Keys":[166741,166742],"Action":4,"Values":["sjoerd_zelf",'
+        '"sjoerd_test_source"]}]}',
+    )
+
+    GET_USERS_FOR_KEYFILE_RESPONSE = (  # response after successful GET to Keyfiles/{KeyfileKey}/Users
+        200,
+        r'{ "Count": 2, "Page": 1, "PageSize": 20, "PageCount": 1, "Data": [ { "Name": "umcn\\SVC01234", "Email":'
+        r'"?", "DisplayName": "umcn\\SVC01234", "Department": "?", "BaseRole": "CREATE_KEYFILE", "UserKey": 26,'
+        ' "Memberships": [ { "Keyfile": 26, "KeyfileName": "API_test", '
+        '"Role": "ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS", '
+        '"NiceRole": "nonhuman standard with reidentification rights", "Deleted": false } ], '
+        r'"More": false, "Deleted": false }, { "Name": "UMCN\\Z123456", "Email": "a.smith@radboudumc.nl", '
+        '"DisplayName": "Smith, Arnold", "Department": "Radiologie en Nucleaire Geneeskunde",'
+        ' "BaseRole": "NONE", "UserKey": 22, "Memberships": [ { "Keyfile": 26, "KeyfileName": "API_test",'
+        ' "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "keyfile owner", "Deleted": false } ], "More": false,'
+        ' "Deleted": false } ]}',
     )

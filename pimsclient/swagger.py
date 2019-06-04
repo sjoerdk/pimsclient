@@ -2,7 +2,7 @@
 Objects and classes that can be directly mapped to the PIMS Swagger API. Retrieving, Saving, Error handling
 
 """
-from pimsclient.client import Pseudonym, Key
+from pimsclient.client import Key
 
 
 class SwaggerObject:
@@ -40,8 +40,7 @@ class SwaggerObject:
 
 
 class KeyFile(SwaggerObject):
-
-    def __init__(self, key, name, description="", pseudonym_template='Guid'):
+    def __init__(self, key, name, description="", pseudonym_template="Guid"):
         """A table of pseudonyms
 
         Parameters
@@ -64,22 +63,25 @@ class KeyFile(SwaggerObject):
         return f'KeyFile "{self.name}" (key={self.key})'
 
     def to_dict(self):
-        return {'KeyfileKey': self.key,
-                'Name': self.name,
-                'Description': self.description,
-                'PseudonymTemplate': self.pseudonym_template}
+        return {
+            "KeyfileKey": self.key,
+            "Name": self.name,
+            "Description": self.description,
+            "PseudonymTemplate": self.pseudonym_template,
+        }
 
     @classmethod
     def from_dict(cls, dict_in):
-        return cls(key=dict_in['KeyfileKey'],
-                   name=dict_in['Name'],
-                   description=dict_in['Description'],
-                   pseudonym_template=dict_in['PseudonymTemplate'])
+        return cls(
+            key=dict_in["KeyfileKey"],
+            name=dict_in["Name"],
+            description=dict_in["Description"],
+            pseudonym_template=dict_in["PseudonymTemplate"],
+        )
 
 
 class User(SwaggerObject):
-
-    def __init__(self, key, name, email):
+    def __init__(self, key, name, email, role):
         """A PIMS user
 
         Parameters
@@ -90,24 +92,33 @@ class User(SwaggerObject):
             name of the user, no spaces allowed
         email: str
             user email
+        role: str
+            Base role for user, as assigned in Swagger
         """
         self.key = key
         self.name = name
         self.email = email
+        self.role = role
 
     def __str__(self):
         return f'User "{self.name}" <{self.email}> (key={self.key})'
 
     def to_dict(self):
-        return {'UserKey': self.key,
-                'Name': self.name,
-                'Email': self.email}
+        return {
+            "UserKey": self.key,
+            "Name": self.name,
+            "Email": self.email,
+            "BaseRole": self.role,
+        }
 
     @classmethod
     def from_dict(cls, dict_in):
-        return cls(key=dict_in['UserKey'],
-                   name=dict_in['Name'],
-                   email=dict_in['Email'])
+        return cls(
+            key=dict_in["UserKey"],
+            name=dict_in["Name"],
+            email=dict_in["Email"],
+            role=dict_in["BaseRole"],
+        )
 
 
 class SwaggerEntryPoint:
@@ -116,6 +127,7 @@ class SwaggerEntryPoint:
     Includes logged-in session
 
     """
+
     url_path = None
 
     def __init__(self, session):
@@ -127,7 +139,7 @@ class SwaggerEntryPoint:
             session to use when communicating with this entry point
         """
         self.session = session
-        self.url = f'{session.base_url}{self.url_path}'
+        self.url = f"{session.base_url}{self.url_path}"
 
     def __str__(self):
         return f"Swagger entrypoint '{self.url_path}' trough session {self.session}"
@@ -135,7 +147,7 @@ class SwaggerEntryPoint:
 
 class KeyFiles(SwaggerEntryPoint):
 
-    url_path = '/Keyfiles'
+    url_path = "/Keyfiles"
 
     def __init__(self, session):
         super(KeyFiles, self).__init__(session)
@@ -171,7 +183,7 @@ class KeyFiles(SwaggerEntryPoint):
         """
         url = f"{self.url}/ForUser/{str(user.key)}"
         fields = self.session.get(url)
-        return [KeyFile.from_dict(x) for x in fields['Data']]
+        return [KeyFile.from_dict(x) for x in fields["Data"]]
 
     def pseudonymize(self, keyfile, identifiers):
         """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
@@ -192,11 +204,16 @@ class KeyFiles(SwaggerEntryPoint):
         """
         url = f"{self.url}/{keyfile.key}/Pseudonyms"
         keys = []
+
         for identifier in identifiers:
             fields = self.session.post(url, params=identifier.to_dict())
-            keys.append(Key.init_from_strings(pseudonym=fields['Pseudonym'],
-                                              identity=fields['Identifier'],
-                                              identity_source=fields['IdentitySource']))
+            keys.append(
+                Key.init_from_strings(
+                    pseudonym=fields["Pseudonym"],
+                    identity=fields["Identifier"],
+                    identity_source=fields["IdentitySource"],
+                )
+            )
 
         return keys
 
@@ -221,20 +238,35 @@ class KeyFiles(SwaggerEntryPoint):
 
         """
         url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
-        fields = self.session.post(url, params={'ReturnIdentity': True,
-                                                'ReturnColumns': '*',
-                                                'items': [x.value for x in pseudonyms]})
-        data = {x['Name']: x['Values'] for x in fields['Data']}  # data is returned in separate lists
+        fields = self.session.post(
+            url,
+            params={
+                "ReturnIdentity": True,
+                "ReturnColumns": "*",
+                "items": [x.value for x in pseudonyms],
+            },
+        )
+        data = {
+            x["Name"]: x["Values"] for x in fields["Data"]
+        }  # data is returned in separate lists
 
-        keys = [Key.init_from_strings(x, y, z) for x, y, z in zip(data['Pseudonyms'],
-                                                                  data['Identity'],
-                                                                  data['Identity Source'])]
+        keys = [
+            Key.init_from_strings(x, y, z)
+            for x, y, z in zip(
+                data["Pseudonyms"], data["Identity"], data["Identity Source"]
+            )
+        ]
         return keys
+
+    def get_users(self, key_file):
+        url = f"{self.url}/{key_file.key}/Users"
+        fields = self.session.get(url)
+        return [User.from_dict(x) for x in fields["Data"]]
 
 
 class Users(SwaggerEntryPoint):
 
-    url_path = '/Users'
+    url_path = "/Users"
 
     def __init__(self, session):
         super(Users, self).__init__(session)
@@ -253,6 +285,7 @@ class Users(SwaggerEntryPoint):
         """
 
         url = f"{self.url}/{str(key)}/Details"
-        fields = self.session.get(url)['Data'][0]  # server returns a paginated response with one entry
+        fields = self.session.get(url)["Data"][
+            0
+        ]  # server returns a paginated response with one entry
         return User.from_dict(fields)
-

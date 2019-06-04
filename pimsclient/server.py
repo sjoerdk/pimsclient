@@ -65,8 +65,20 @@ class PIMSSession:
     def close(self):
         return self.session.close()
 
-    @staticmethod
-    def check_response(response):
+    def username(self):
+        """Get username
+
+        Returns
+        -------
+        str
+            Username that is being used in current session
+        """
+        if hasattr(self.session, "auth"):
+            return self.session.auth.username
+        else:
+            return "unknown"
+
+    def check_response(self, response):
         """Check response from PIMS server and raise appropriate exceptions
 
         Parameters
@@ -80,7 +92,11 @@ class PIMSSession:
             If an action is not allowed by PIMS for the logged in user
 
         """
-        if response.status_code == 403:
+        if response.status_code == 401:
+            raise Unauthorized(
+                f"Credentials for '{self.username()}' do not seem to work"
+            )
+        elif response.status_code == 403:
             raise OperationForbidden(response.text)
         elif response.status_code == 405:
             raise OperationNotSupported(response.text)
@@ -121,15 +137,19 @@ class PIMSServer:
 
         """
         if not user:
-            user = environ.get('PIMS_CLIENT_USER')
+            user = environ.get("PIMS_CLIENT_USER")
         if not password:
-            password = environ.get('PIMS_CLIENT_PASSWORD')
+            password = environ.get("PIMS_CLIENT_PASSWORD")
         session = requests.Session()
-        session.auth = HttpNtlmAuth(f'umcn\\{user}', password)
+        session.auth = HttpNtlmAuth(f"umcn\\{user}", password)
         return PIMSSession(session=session, base_url=self.url)
 
 
 class PIMSServerException(Exception):
+    pass
+
+
+class Unauthorized(PIMSServerException):
     pass
 
 
