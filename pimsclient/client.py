@@ -2,7 +2,7 @@
 
 """ Classes and function for working with the PIMS pseudonym management system.
 
-Pims uses the 'keyfile' as its main object. A keyfile is a table of original IDs and connected pseudonyms. Each keyfile
+Pims uses the 'key_file' as its main object. A key_file is a table of original IDs and connected pseudonyms. Each key_file
 has a single template for generating new pseudonyms.
 
 This module adds one level above the PIMS level, making it possible to maintain multiple types of pseudonym under a
@@ -81,3 +81,7 @@ class Key:
 
     def __str__(self):
         return f"Key {self.pseudonym.value}"
+
+
+# TODO: create second layer. classes: Project StudyInstanceUID, PatientName, etc, all with their own key_file
+

@@ -38,7 +38,7 @@ class PIMSSession:
         response = self.check_response(self.session.get(url))
         return json.loads(response.content)
 
-    def post(self, url, params):
+    def post(self, url, params, json_payload=None):
         """Do a html post over this session
 
         Parameters
@@ -46,7 +46,9 @@ class PIMSSession:
         url: str
             url to call
         params: Dict
-            dictionary of values to send
+            dictionary of values to send as parameters
+        json_payload: Dict, optional
+            Json data to post. Defaults to None, do not send along any json
 
         Raises
         ------
@@ -59,7 +61,7 @@ class PIMSSession:
             json-decoded contents of response to post
 
         """
-        response = self.check_response(self.session.post(url, params=params))
+        response = self.check_response(self.session.post(url, params=params, json=json_payload))
         return json.loads(response.content)
 
     def close(self):
@@ -92,7 +94,9 @@ class PIMSSession:
             If an action is not allowed by PIMS for the logged in user
 
         """
-        if response.status_code == 401:
+        if response.status_code == 400:
+            raise BadRequest(response.text)
+        elif response.status_code == 401:
             raise Unauthorized(
                 f"Credentials for '{self.username()}' do not seem to work"
             )
@@ -130,6 +134,11 @@ class PIMSServer:
         password: str, optional
             password to connect to PIMS API, defaults to reading environment key ['PIMS_CLIENT_PASSWORD']
 
+        Raises
+        ------
+        PIMSServerException
+            When no username or password is given or found in env
+
         Returns
         -------
         PIMSSession
@@ -140,12 +149,18 @@ class PIMSServer:
             user = environ.get("PIMS_CLIENT_USER")
         if not password:
             password = environ.get("PIMS_CLIENT_PASSWORD")
+        if user is None or password is None:
+            raise PIMSServerException("Username and password not found. These are required")
         session = requests.Session()
         session.auth = HttpNtlmAuth(f"umcn\\{user}", password)
         return PIMSSession(session=session, base_url=self.url)
 
 
 class PIMSServerException(Exception):
+    pass
+
+
+class BadRequest(PIMSServerException):
     pass
 
 

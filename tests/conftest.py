@@ -21,3 +21,10 @@ def mock_pims_session(monkeypatch):
     return session
 
 
+@pytest.fixture()
+def mock_requests(monkeypatch):
+    """Replace requests lib in pimsclient.server with a mock requests lib"""
+
+    mock = RequestsMock
+    monkeypatch.setattr('pimsclient.server.requests', mock)
+    return mock

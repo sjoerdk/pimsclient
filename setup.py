@@ -27,7 +27,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Client for PIMS keyfile management swagger web API",
+    description="Client for PIMS key_file management swagger web API",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,

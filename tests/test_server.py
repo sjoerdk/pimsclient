@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from pimsclient.server import PIMSSession, PIMSServerException
+from pimsclient.server import PIMSSession, PIMSServerException, PIMSServer
 from tests.factories import UserFactory, RequestsMock, RequestsMockResponseExamples
 
 
@@ -14,6 +14,7 @@ from tests.factories import UserFactory, RequestsMock, RequestsMockResponseExamp
         RequestsMockResponseExamples.REQUESTED_RESOURCE_DOES_NOT_SUPPORT,
         RequestsMockResponseExamples.UKNOWN_URL,
         RequestsMockResponseExamples.UNAUTHORIZED,
+        RequestsMockResponseExamples.INVALID_API_REQUEST
     ],
 )
 def test_swagger_error_responses(mock_pims_session, mock_response):
@@ -27,3 +28,21 @@ def test_swagger_error_responses(mock_pims_session, mock_response):
 
     with pytest.raises(PIMSServerException):
         mock_pims_session.post("a_url", params={})
+
+
+def test_gemock_response_session(mock_requests, monkeypatch):
+    server = PIMSServer(url='Test')
+
+    with pytest.raises(PIMSServerException): #  no password defined, should raise exception
+        server.get_session()
+
+    # this should work though
+    server.get_session(user='test', password='password')
+
+    # and this
+    monkeypatch.setenv('PIMS_CLIENT_USER', 'TestUser')
+    monkeypatch.setenv('PIMS_CLIENT_PASSWORD', 'TestPass')
+    server.get_session()
+
+
+

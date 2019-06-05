@@ -3,6 +3,7 @@ Objects and classes that can be directly mapped to the PIMS Swagger API. Retriev
 
 """
 from pimsclient.client import Key
+from collections import defaultdict
 
 
 class SwaggerObject:
@@ -46,11 +47,11 @@ class KeyFile(SwaggerObject):
         Parameters
         ----------
         key: str
-            swagger key for this keyfile
+            swagger key for this key_file
         name: str
-            short name for this keyfile. No spaces allowed
+            short name for this key_file. No spaces allowed
         description: str
-            Description of this keyfile
+            Description of this key_file
         pseudonym_template: str
             Template for creating new pseudonyms. See PIMS documentation for format
         """
@@ -153,12 +154,12 @@ class KeyFiles(SwaggerEntryPoint):
         super(KeyFiles, self).__init__(session)
 
     def get(self, key):
-        """Get a specific keyfile
+        """Get a specific key_file
 
         Parameters
         ----------
         key: int or str
-            key for the keyfile to get
+            key for the key_file to get
 
         Returns
         -------
@@ -185,7 +186,7 @@ class KeyFiles(SwaggerEntryPoint):
         fields = self.session.get(url)
         return [KeyFile.from_dict(x) for x in fields["Data"]]
 
-    def pseudonymize(self, keyfile, identifiers):
+    def pseudonymize(self, key_file, identifiers):
         """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
         have PIMS generate a new pseudonym and return that.
 
@@ -193,8 +194,8 @@ class KeyFiles(SwaggerEntryPoint):
         ----------
         identifiers: List[Identifier]
             The identifiers to get pseudonyms for
-        keyfile: KeyFile
-            The keyfile to use
+        key_file: KeyFile
+            The key_file to use
 
         Returns
         -------
@@ -202,11 +203,23 @@ class KeyFiles(SwaggerEntryPoint):
             The PIMS pseudonym for each identifier
 
         """
-        url = f"{self.url}/{keyfile.key}/Pseudonyms"
-        keys = []
+        url = f"{self.url}/{key_file.key}/Files/Deidentify"
 
-        for identifier in identifiers:
-            fields = self.session.post(url, params=identifier.to_dict())
+        keys = []
+        per_source = defaultdict(list)
+        for x in identifiers:
+            per_source[x.source].append(x)
+        for source, items in per_source.items():
+            data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
+                        "values":[x.value for x in items]}]
+
+            params = {'FileName': 'DataEntry',
+                      'identity_source': source,
+                      'CreateOutputfile': True,
+                      'overwrite': 'Overwrite'}
+
+            raise NotImplemented("Waiting for fix in PIMS functionality")
+            fields = self.session.post(url, params=params, json_payload=data)
             keys.append(
                 Key.init_from_strings(
                     pseudonym=fields["Pseudonym"],
@@ -214,6 +227,30 @@ class KeyFiles(SwaggerEntryPoint):
                     identity_source=fields["IdentitySource"],
                 )
             )
+        return keys
+
+    def pseudonymize_legacy(self, key_file, identifiers):
+        """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
+        have PIMS generate a new pseudonym and return that.
+        Parameters
+        ----------
+        identifiers: List[Identifier]
+            The identifiers to get pseudonyms for
+        key_file: KeyFile
+            The key_file to use
+        Returns
+        -------
+        List[Key]
+            The PIMS pseudonym for each identifier
+        """
+
+        url = f"{self.url}/{key_file.key}/Pseudonyms"
+        keys = []
+        for identifier in identifiers:
+            fields = self.session.post(url, params=identifier.to_dict())
+            keys.append(Key.init_from_strings(pseudonym=fields['Pseudonym'],
+                                              identity=fields['Identifier'],
+                                              identity_source=fields['IdentitySource']))
 
         return keys
 
@@ -223,7 +260,7 @@ class KeyFiles(SwaggerEntryPoint):
         Parameters
         ----------
         key_file: KeyFile
-            The keyfile to use
+            The key_file to use
         pseudonyms: List[Pseudonym]
             The pseudonyms to get identifyers for
 

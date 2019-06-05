@@ -102,11 +102,17 @@ class RequestsMock:
         """True if either get() or post() was called"""
         return self.requests_mock.get.called or self.requests_mock.post.called
 
+    @staticmethod
+    def Session():
+        return Mock()
+
 
 class RequestsMockResponseExamples:
     """Some examples of http response texts that a PIMS Swagger API can return
 
     """
+
+    INVALID_API_REQUEST = (400, r': "Bad request!"')
 
     KEYFILE_DOES_NOT_EXIST = (404, r': "Keyfile does not exist (anymore)"')
 
@@ -160,6 +166,14 @@ class RequestsMockResponseExamples:
         '"sjoerd_test_source"]}]}',
     )
 
+    GET_USER_BY_ID_RESPONSE = (  # Call to 'api/Users/{KeyFileKey}/Details'
+        200,
+        r'{"Count":1,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"umcn\\SVC01234","Email":null,'
+        '"DisplayName":null,"Department":null,"BaseRole":"NONE","UserKey":26,"Memberships":[{"Keyfile":26,'
+        '"KeyfileName":"z428172_API_test","Role":"ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS",'
+        '"NiceRole":"nonhuman standard with reidentification rights","Deleted":false}],"More":true,"Deleted":false}]}'
+    )
+
     GET_USERS_FOR_KEYFILE_RESPONSE = (  # response after successful GET to Keyfiles/{KeyfileKey}/Users
         200,
         r'{ "Count": 2, "Page": 1, "PageSize": 20, "PageCount": 1, "Data": [ { "Name": "umcn\\SVC01234", "Email":'
@@ -170,6 +184,6 @@ class RequestsMockResponseExamples:
         r'"More": false, "Deleted": false }, { "Name": "UMCN\\Z123456", "Email": "a.smith@radboudumc.nl", '
         '"DisplayName": "Smith, Arnold", "Department": "Radiologie en Nucleaire Geneeskunde",'
         ' "BaseRole": "NONE", "UserKey": 22, "Memberships": [ { "Keyfile": 26, "KeyfileName": "API_test",'
-        ' "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "keyfile owner", "Deleted": false } ], "More": false,'
+        ' "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "key_file owner", "Deleted": false } ], "More": false,'
         ' "Deleted": false } ]}',
     )
