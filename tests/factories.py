@@ -1,11 +1,12 @@
 from unittest.mock import Mock
 
 import factory
+from factory import fuzzy
 
 from requests.models import Response
 
-from pimsclient.client import Pseudonym, Identifier
-from pimsclient.swagger import User, KeyFile
+from pimsclient.client import ValueTypes, TypedKey
+from pimsclient.swagger import User, KeyFile, Identifier, Pseudonym, Key
 
 
 class UserFactory(factory.Factory):
@@ -43,6 +44,32 @@ class IdentifierFactory(factory.Factory):
 
     value = factory.Faker("first_name")
     source = "generated_by_factory"
+
+
+class TypedIdentifierFactory(factory.Factory):
+    """ An identifier that can be interpreted as having a valid value type
+    """
+    class Meta:
+        model = Identifier
+
+    value = factory.Faker("first_name")
+    source = fuzzy.FuzzyChoice(ValueTypes.all)
+
+
+class KeyFactory(factory.Factory):
+    class Meta:
+        model = Key
+
+    identifier = factory.SubFactory(IdentifierFactory)
+    pseudonym = factory.SubFactory(PseudonymFactory)
+
+
+class TypedKeyFactory(factory.Factory):
+    class Meta:
+        model = TypedKey
+
+    identifier = factory.SubFactory(TypedIdentifierFactory)
+    pseudonym = factory.SubFactory(PseudonymFactory)
 
 
 class RequestsMock:

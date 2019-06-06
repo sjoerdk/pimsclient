@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pimsclient.client import Identifier
-from pimsclient.swagger import KeyFile, User, KeyFiles, Users
+from pimsclient.swagger import KeyFile, User, KeyFiles, Users, Identifier
 from tests.factories import (
     UserFactory,
     KeyFileFactory,

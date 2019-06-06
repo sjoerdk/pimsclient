@@ -2,7 +2,6 @@
 Objects and classes that can be directly mapped to the PIMS Swagger API. Retrieving, Saving, Error handling
 
 """
-from pimsclient.client import Key
 from collections import defaultdict
 
 
@@ -180,7 +179,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         Returns
         -------
-        List(KeyFile)
+        List[KeyFile]
         """
         url = f"{self.url}/ForUser/{str(user.key)}"
         fields = self.session.get(url)
@@ -326,3 +325,76 @@ class Users(SwaggerEntryPoint):
             0
         ]  # server returns a paginated response with one entry
         return User.from_dict(fields)
+
+
+class Identifier:
+    def __init__(self, value, source):
+        """A real patientID, StudyInstance or the like, with a source
+
+        Parameters
+        ----------
+        value: str
+            PatientID, StudyInstance or whatever should be pseudonymized
+        source: str
+            Source for this value, like the hospital where the PatientID is used. Used for disambiguation
+        """
+        self.value = value
+        self.source = source
+
+    def __str__(self):
+        return f"Identifier '{self.value}' (source:'{self.source}')"
+
+    def to_dict(self):
+        return {"identifier": self.value, "identity_source": self.source}
+
+
+class Pseudonym:
+    def __init__(self, value):
+        """A pseudonym for an actual identifier.
+
+        Parameters
+        ----------
+        value: str
+            The value of this pseudonym, like 'Patient1' or 'Case_23'
+        """
+        self.value = value
+
+    def __str__(self):
+        return f"Pseudonym '{self.value}'"
+
+
+class Key:
+    def __init__(self, identifier, pseudonym):
+        """Links an identifier with a pseudonym
+
+        Parameters
+        ----------
+        identifier: Identifier
+            Real identifier, like 'Yen Hu'
+        pseudonym:
+            Pseudonym used for the identifyer, like 'Case3'
+        """
+        self.identifier = identifier
+        self.pseudonym = pseudonym
+
+    @classmethod
+    def init_from_strings(cls, pseudonym, identity, identity_source):
+        """Creates a Key from string-only input arguments. For convenience
+
+        Parameters
+        ----------
+        pseudonym: str
+        identity: str
+        identity_source: str
+
+        Returns
+        -------
+        Key
+        """
+        return cls(
+            identifier=Identifier(value=identity, source=identity_source),
+            pseudonym=Pseudonym(value=pseudonym),
+        )
+
+    def __str__(self):
+        return f"Key {self.pseudonym.value}"

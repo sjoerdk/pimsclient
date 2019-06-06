@@ -142,7 +142,7 @@ class PIMSServer:
         Returns
         -------
         PIMSSession
-            Logged in session
+            Logged in requests.session object
 
         """
         if not user:
