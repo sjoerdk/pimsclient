@@ -32,7 +32,13 @@ Client for PIMS keyfile management swagger web API.
 Features
 --------
 
-* TODO
+* Pseudonymize and reidentify using PIMS keyfile management as backend
+* Supports multiple value types: PatientUID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID
+* Authentication via NTLM
+
+Getting started
+---------------
+See `Usage <https://pimsclient.readthedocs.io/en/latest/usage.html>`
 
 Credits
 -------
