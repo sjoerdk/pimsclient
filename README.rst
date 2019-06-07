@@ -13,6 +13,13 @@ pimsclient
         :target: https://pimsclient.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://api.codeclimate.com/v1/badges/aca3e6099b08a606075f/maintainability
+       :target: https://codeclimate.com/github/sjoerdk/pimsclient/maintainability
+       :alt: Maintainability
+
+.. image:: https://codecov.io/gh/sjoerdk/pimsclient/branch/master/graph/badge.svg
+        :target: https://codecov.io/gh/sjoerdk/pimsclient
+
 .. image:: https://pyup.io/repos/github/sjoerdk/pimsclient/shield.svg
      :target: https://pyup.io/repos/github/sjoerdk/pimsclient/
      :alt: Updates
