@@ -3,7 +3,7 @@ dist: xenial
 python:
 - 3.7
 before_install:
-- pip install codecov pytest-cov requests-ntlm
+- pip install codecov pytest-cov requests-ntlm factory-boy
 install: pip install -U tox-travis
 script: tox
 after_success:
