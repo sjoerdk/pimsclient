@@ -411,7 +411,7 @@ class Key:
         """
         return cls(
             identifier=Identifier(value=identity, source=identity_source),
-            pseudonym=Pseudonym(value=pseudonym),
+            pseudonym=Pseudonym(value=pseudonym, source=identity_source),
         )
 
     def __str__(self):
