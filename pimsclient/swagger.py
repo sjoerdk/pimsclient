@@ -196,6 +196,11 @@ class KeyFiles(SwaggerEntryPoint):
         key_file: KeyFile
             The key_file to use
 
+        Notes
+        -----
+        Each call this function calls PIMS API twice for each unique source in identifiers. This is result of the way
+        the API can be called
+
         Returns
         -------
         List[Key]
@@ -203,8 +208,10 @@ class KeyFiles(SwaggerEntryPoint):
 
         """
         url = f"{self.url}/{key_file.key}/Files/Deidentify"
+        reidentify_url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
 
         keys = []
+        # Each call to process a list of identifiers only allows a single source. Split identifiers by source
         per_source = defaultdict(list)
         for x in identifiers:
             per_source[x.source].append(x)
@@ -217,39 +224,21 @@ class KeyFiles(SwaggerEntryPoint):
                       'CreateOutputfile': True,
                       'overwrite': 'Overwrite'}
 
-            raise NotImplemented("Waiting for fix in PIMS functionality")
-            fields = self.session.post(url, params=params, json_payload=data)
-            keys.append(
-                Key.init_from_strings(
-                    pseudonym=fields["Pseudonym"],
-                    identity=fields["Identifier"],
-                    identity_source=fields["IdentitySource"],
-                )
+            # this needs two calls. First call to create new pseudonyms
+            self.session.post(url, params=params, json_payload=data)
+
+            # Second to get back the pseudonyms that were created
+            fields = self.session.post(
+                    reidentify_url,
+                    params={
+                        "ReturnIdentity": True,
+                        "ReturnColumns": "*",
+                        "IdentitySource": source,
+                        "items": [x.value for x in items],
+                    },
             )
-        return keys
 
-    def pseudonymize_legacy(self, key_file, identifiers):
-        """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
-        have PIMS generate a new pseudonym and return that.
-        Parameters
-        ----------
-        identifiers: List[Identifier]
-            The identifiers to get pseudonyms for
-        key_file: KeyFile
-            The key_file to use
-        Returns
-        -------
-        List[Key]
-            The PIMS pseudonym for each identifier
-        """
-
-        url = f"{self.url}/{key_file.key}/Pseudonyms"
-        keys = []
-        for identifier in identifiers:
-            fields = self.session.post(url, params=identifier.to_dict())
-            keys.append(Key.init_from_strings(pseudonym=fields['Pseudonym'],
-                                              identity=fields['Identifier'],
-                                              identity_source=fields['IdentitySource']))
+            keys = keys + self.fields_to_keys(fields)
 
         return keys
 
@@ -265,7 +254,8 @@ class KeyFiles(SwaggerEntryPoint):
 
         Notes
         -----
-        Returned list might be shorter than input list. For unknown pseudonyms no keys are returned
+        * Returned list might be shorter than input list. For unknown pseudonyms no keys are returned
+        * Every unique source in pseudonyms list yields one https call to API
 
         Returns
         -------
@@ -274,18 +264,43 @@ class KeyFiles(SwaggerEntryPoint):
 
         """
         url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
-        fields = self.session.post(
-            url,
-            params={
-                "ReturnIdentity": True,
-                "ReturnColumns": "*",
-                "items": [x.value for x in pseudonyms],
-            },
-        )
+
+        keys = []
+        per_source = defaultdict(list)
+        for x in pseudonyms:
+            per_source[x.source].append(x)
+        for source, items in per_source.items():
+            fields = self.session.post(
+                url,
+                params={
+                    "ReturnIdentity": True,
+                    "ReturnColumns": "*",
+                    "IdentitySource": source,
+                    "items": [x.value for x in items],
+                },
+            )
+            keys = keys + self.fields_to_keys(fields)
+
+        return keys
+
+    @staticmethod
+    def fields_to_keys(fields):
+        """Parses standard multi-key API response to a list of Keys
+
+        Parameters
+        ----------
+        fields: Dict
+            The standard type of response given by the Swagger API when multiple identity-pseuonym pairs are returned.
+            For a good example see tests.factories.RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+
+        Returns
+        -------
+        List[Key]
+
+        """
         data = {
             x["Name"]: x["Values"] for x in fields["Data"]
         }  # data is returned in separate lists
-
         keys = [
             Key.init_from_strings(x, y, z)
             for x, y, z in zip(
@@ -349,18 +364,21 @@ class Identifier:
 
 
 class Pseudonym:
-    def __init__(self, value):
+    def __init__(self, value, source=None):
         """A pseudonym for an actual identifier.
 
         Parameters
         ----------
         value: str
             The value of this pseudonym, like 'Patient1' or 'Case_23'
+        source: str, optional
+            Source for this value. Defaults to None
         """
         self.value = value
+        self.source = source
 
     def __str__(self):
-        return f"Pseudonym '{self.value}'"
+        return f"Pseudonym '{self.value}' (source:'{self.source}')"
 
 
 class Key:

@@ -2,10 +2,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from pimsclient.client import PatientID, Project, KeyTypeFactory, TypedKeyFactoryException, NoConnectionException, \
-    PIMSConnection
+from pimsclient.client import Project, KeyTypeFactory, TypedKeyFactoryException, NoConnectionException, \
+    PIMSConnection, TypedPseudonym
 from pimsclient.swagger import Key
-from tests.factories import IdentifierFactory, PseudonymFactory, TypedKeyFactory
+from tests.factories import IdentifierFactory, PseudonymFactory, TypedKeyFactory, RequestsMockResponseExamples, \
+    KeyFileFactory, TypedPseudonymFactory, TypedIdentifierFactory
 
 
 @pytest.fixture()
@@ -53,11 +54,27 @@ def test_typed_key_factory_exception():
                                         'StudyInstanceUID',
                                         'SeriesInstanceUID',
                                         'SOPInstanceUID'])
-def test_typed_key_factory_exception(value_type):
+def test_typed_key_factory(value_type):
     """Creating typed keys for these value types should work"""
     key = Key(identifier=IdentifierFactory(source=value_type), pseudonym=PseudonymFactory())
 
     typed_key = KeyTypeFactory().create_typed_key(key)
     assert typed_key.value_type == value_type
 
+
+def test_pimsconnection(mock_pims_session):
+    connection = PIMSConnection(session=mock_pims_session)
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+    )
+    connection.pseudonymize(key_file=KeyFileFactory(), identifiers=[IdentifierFactory()])
+    connection.reidentify(key_file=KeyFileFactory(), pseudonyms=[PseudonymFactory()])
+
+
+def test_str():
+    project = Project(key_file_id=0, connection=Mock())
+    string = f'{IdentifierFactory()}{project}{project.get_name()}{TypedKeyFactory()}{TypedIdentifierFactory}' \
+        f'{TypedPseudonym(value="kees")}'
+
+    assert string
 

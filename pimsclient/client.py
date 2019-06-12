@@ -145,17 +145,17 @@ class PIMSConnection:
 
         Parameters
         ----------
-        identifiers: List[Identifier]
-            The identifiers to get pseudonyms for
         key_file: KeyFile
             The key_file to use
+        identifiers: List[Identifier]
+            The identifiers to get pseudonyms for
 
         Returns
         -------
         List[Key]
             The PIMS pseudonym for each identifier
         """
-        return self.key_files.pseudonymize_legacy(
+        return self.key_files.pseudonymize(
             key_file=key_file, identifiers=identifiers
         )
 
@@ -252,8 +252,7 @@ class TypedPseudonym(Pseudonym):
     value_type = ValueTypes.NOT_SET
 
     def __init__(self, value):
-        super().__init__(value=value)
-        self.value_type = self.value_type
+        super().__init__(value=value, source=self.value_type)
 
     def __str__(self):
         return f"Pseudo{self.value_type}: {self.value}"
@@ -393,7 +392,7 @@ class KeyTypeFactory:
         try:
             identifier_class = self.pseudonym_class_map[value_type]
             return identifier_class(pseudonym.value)
-        except ValueError:
+        except KeyError:
             msg = f'Unknown value type {pseudonym.source}. Known types: {list(self.pseudonym_class_map.keys())}'
             raise TypedKeyFactoryException(msg)
 
