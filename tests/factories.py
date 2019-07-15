@@ -5,7 +5,7 @@ from factory import fuzzy
 
 from requests.models import Response
 
-from pimsclient.client import ValueTypes, TypedKey, TypedPseudonym
+from pimsclient.client import ValueTypes, TypedKey, TypedPseudonym, PatientID, PseudoPatientID
 from pimsclient.swagger import User, KeyFile, Identifier, Pseudonym, Key
 
 
@@ -56,6 +56,15 @@ class TypedIdentifierFactory(factory.Factory):
     source = fuzzy.FuzzyChoice(ValueTypes.all)
 
 
+class PatientIDFactory(factory.Factory):
+    """ An identifier that can be interpreted as being a PatientID
+    """
+    class Meta:
+        model = PatientID
+
+    value = factory.Faker("first_name")
+
+
 class TypedPseudonymFactory(factory.Factory):
     """ A Pseudonym that can be interpreted as having a valid value type
     """
@@ -64,6 +73,15 @@ class TypedPseudonymFactory(factory.Factory):
 
     value = factory.Faker("first_name")
     source = fuzzy.FuzzyChoice(ValueTypes.all)
+
+
+class PseudoPatientIDFactory(factory.Factory):
+    """ A Pseudonym for a PatientID
+    """
+    class Meta:
+        model = PseudoPatientID
+
+    value = factory.Faker("first_name")
 
 
 class KeyFactory(factory.Factory):

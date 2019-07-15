@@ -185,7 +185,7 @@ class KeyFiles(SwaggerEntryPoint):
         fields = self.session.get(url)
         return [KeyFile.from_dict(x) for x in fields["Data"]]
 
-    def pseudonymize(self, key_file, identifiers):
+    def pseudonymize(self, key_file, identifiers, chunk_size=20):
         """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
         have PIMS generate a new pseudonym and return that.
 
@@ -195,6 +195,8 @@ class KeyFiles(SwaggerEntryPoint):
             The identifiers to get pseudonyms for
         key_file: KeyFile
             The key_file to use
+        chunk_size: int, optional
+            Maximum number of identifiers to process per API call. Defaults to 20
 
         Notes
         -----
@@ -216,33 +218,36 @@ class KeyFiles(SwaggerEntryPoint):
         for x in identifiers:
             per_source[x.source].append(x)
         for source, items in per_source.items():
-            data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
-                     "values":[x.value for x in items] + [""]}]  # add empty item because of bug in PIMS (#8671)
+            while items:
+                items_chunk = items[:chunk_size]
+                items = items[chunk_size:]
+                data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
+                         "values":[x.value for x in items_chunk] + [""]}]  # add empty item because of bug in PIMS (#8671)
 
-            params = {'FileName': 'DataEntry',
-                      'identity_source': source,
-                      'CreateOutputfile': True,
-                      'overwrite': 'Overwrite'}
+                params = {'FileName': 'DataEntry',
+                          'identity_source': source,
+                          'CreateOutputfile': True,
+                          'overwrite': 'Overwrite'}
 
-            # this needs two calls. First call to create new pseudonyms
-            self.session.post(url, params=params, json_payload=data)
+                # this needs two calls. First call to create new pseudonyms
+                self.session.post(url, params=params, json_payload=data)
 
-            # Second to get back the pseudonyms that were created
-            fields = self.session.post(
-                    reidentify_url,
-                    params={
-                        "ReturnIdentity": True,
-                        "ReturnColumns": "*",
-                        "IdentitySource": source,
-                        "items": [x.value for x in items],
-                    },
-            )
+                # Second to get back the pseudonyms that were created
+                fields = self.session.post(
+                        reidentify_url,
+                        params={
+                            "ReturnIdentity": True,
+                            "ReturnColumns": "*",
+                            "IdentitySource": source,
+                            "items": [x.value for x in items_chunk],
+                        },
+                )
 
-            keys = keys + self.fields_to_keys(fields)
+                keys = keys + self.fields_to_keys(fields)
 
         return keys
 
-    def reidentify(self, key_file, pseudonyms):
+    def reidentify(self, key_file, pseudonyms, chunk_size=20):
         """Find the identifiers linked to the given pseudonyms.
 
         Parameters
@@ -250,7 +255,9 @@ class KeyFiles(SwaggerEntryPoint):
         key_file: KeyFile
             The key_file to use
         pseudonyms: List[Pseudonym]
-            The pseudonyms to get identifyers for
+            The pseudonyms to get identifiers for
+        chunk_size: int, optional
+            Maximum number of identifiers to process per API call. Defaults to 20
 
         Notes
         -----
@@ -270,15 +277,18 @@ class KeyFiles(SwaggerEntryPoint):
         for x in pseudonyms:
             per_source[x.source].append(x)
         for source, items in per_source.items():
-            fields = self.session.post(
-                url,
-                params={
-                    "ReturnIdentity": True,
-                    "ReturnColumns": "*",
-                    "items": [x.value for x in items],
-                },
-            )
-            keys = keys + self.fields_to_keys(fields)
+            while items:
+                items_chunk = items[:chunk_size]
+                items = items[chunk_size:]
+                fields = self.session.post(
+                    url,
+                    params={
+                        "ReturnIdentity": True,
+                        "ReturnColumns": "*",
+                        "items": [x.value for x in items_chunk],
+                    },
+                )
+                keys = keys + self.fields_to_keys(fields)
 
         #  If multiple data types have the same pseudonym value, PIMS will return all. E.g. is there is a patient and
         #  a study that are both called '1234', PIMS will return 2 results for one query to '1234'. Filter only the
