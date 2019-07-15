@@ -217,7 +217,7 @@ class KeyFiles(SwaggerEntryPoint):
             per_source[x.source].append(x)
         for source, items in per_source.items():
             data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
-                        "values":[x.value for x in items]}]
+                     "values":[x.value for x in items] + [""]}]  # add empty item because of bug in PIMS (#8671)
 
             params = {'FileName': 'DataEntry',
                       'identity_source': source,
