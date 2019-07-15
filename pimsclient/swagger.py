@@ -275,13 +275,15 @@ class KeyFiles(SwaggerEntryPoint):
                 params={
                     "ReturnIdentity": True,
                     "ReturnColumns": "*",
-                    "IdentitySource": source,
                     "items": [x.value for x in items],
                 },
             )
             keys = keys + self.fields_to_keys(fields)
 
-        return keys
+        #  If multiple data types have the same pseudonym value, PIMS will return all. E.g. is there is a patient and
+        #  a study that are both called '1234', PIMS will return 2 results for one query to '1234'. Filter only the
+        #  results that were asked for.
+        return [x for x in keys if x.pseudonym in pseudonyms]
 
     @staticmethod
     def fields_to_keys(fields):
@@ -379,6 +381,9 @@ class Pseudonym:
 
     def __str__(self):
         return f"Pseudonym '{self.value}' (source:'{self.source}')"
+
+    def __eq__(self, other):
+        return self.value == other.value and self.source == other.source
 
 
 class Key:

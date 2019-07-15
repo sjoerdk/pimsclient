@@ -65,13 +65,38 @@ class Project:
             )
 
     def get_key_file(self):
-        """Caches keyfile got from PIMS locally"""
+        """Caches keyfile got from PIMS locally
+
+        Returns
+        -------
+        KeyFile
+            The keyfile that this project stores its data in
+        """
         if not self._key_file:
             self._key_file = self.connection.get_key_file(key=self.key_file_id)
         return self._key_file
 
     def get_name(self):
+        """
+
+        Returns
+        -------
+        str:
+            Name of the project in pims
+
+        """
         return self.get_key_file().name
+
+    def get_pims_pseudonym_template(self):
+        """
+
+        Returns
+        -------
+        str:
+            pseudonym template as defined in pims
+
+        """
+        return self.get_key_file().pseudonym_template
 
     def pseudonymize(self, identifiers):
         """Get a pseudonym from PIMS for each identifier in list
@@ -107,8 +132,50 @@ class Project:
             Pseudonym mapped to identifier if found. If a pseudonym is not found in PIMS it is omitted from list
 
         """
-        keys = self.connection.reidentify(key_file=self.get_key_file(), pseudonyms=pseudonyms)
+        keys = self.connection.reidentify(
+            key_file=self.get_key_file(), pseudonyms=pseudonyms
+        )
         return [self.factory.create_typed_key(x) for x in keys]
+
+    def assert_pseudonym_templates(self, should_have_a_template, should_exist):
+        """Make sure the the pseudonym templates for the datatypes in this project are as expected.
+
+        This check makes sure the format UID's makes sense. For example, if no template is defined for StudyInstanceUID,
+        de-identifying might yield a guid, which is not a valid DICOM UID. Fail early in this case, because this will
+        cause headaches later if not fixed.
+
+        Notes
+        -----
+        In this client library a 'PseudonymTemplate' is for a single datatype. In PIMS, the pseudonym template contains
+        templates for all datatypes. See notes for PseudonymTemplate
+
+
+        Parameters
+        ----------
+        should_have_a_template: List[TypedPseudonym]
+            These pseudonym types should have a template defined in this project, regardless of what the actual template
+            is.
+        should_exist: List[PseudonymTemplate]
+            These exact templates should be defined in this project. Requires the template to be exactly a certain value
+
+        Raises
+        ------
+        InvalidPseudonymTemplateException:
+            When this project's template is not as expected
+
+        """
+        pims_template = self.get_pims_pseudonym_template()
+        for typed_pseudonym in should_have_a_template:
+            if f':{typed_pseudonym.value_type}' not in pims_template:
+                msg = f'Could not find any template for "{typed_pseudonym}" in project {self} template "{pims_template}".' \
+                    f' This is required'
+                raise InvalidPseudonymTemplateException(msg)
+
+        for template in should_exist:
+            if template.as_pims_string() not in pims_template:
+                msg = f'Could not find "{template.as_pims_string()}" in project {self} template "{pims_template}".' \
+                    f' This is required'
+                raise InvalidPseudonymTemplateException(msg)
 
 
 class PIMSConnection:
@@ -155,9 +222,7 @@ class PIMSConnection:
         List[Key]
             The PIMS pseudonym for each identifier
         """
-        return self.key_files.pseudonymize(
-            key_file=key_file, identifiers=identifiers
-        )
+        return self.key_files.pseudonymize(key_file=key_file, identifiers=identifiers)
 
     def reidentify(self, key_file, pseudonyms):
         """Find the identifiers linked to the given pseudonyms.
@@ -296,7 +361,7 @@ class TypedKey(Key):
         super().__init__(identifier, pseudonym)
 
     def __str__(self):
-        return f'Key <{self.value_type}>: {self.pseudonym.value}'
+        return f"Key <{self.value_type}>: {self.pseudonym.value}"
 
     @property
     def value_type(self):
@@ -341,7 +406,9 @@ class KeyTypeFactory:
 
         """
         identifier = self.create_typed_identifier(identifier=key.identifier)
-        pseudonym = self.create_typed_pseudonym(pseudonym=key.pseudonym, value_type=identifier.value_type)
+        pseudonym = self.create_typed_pseudonym(
+            pseudonym=key.pseudonym, value_type=identifier.value_type
+        )
 
         return TypedKey(identifier=identifier, pseudonym=pseudonym)
 
@@ -393,9 +460,47 @@ class KeyTypeFactory:
             identifier_class = self.pseudonym_class_map[value_type]
             return identifier_class(pseudonym.value)
         except KeyError:
-            msg = f'Unknown value type {pseudonym.source}. Known types: {list(self.pseudonym_class_map.keys())}'
+            msg = f"Unknown value type {pseudonym.source}. Known types: {list(self.pseudonym_class_map.keys())}"
             raise TypedKeyFactoryException(msg)
 
 
-class TypedKeyFactoryException(Exception):
+class PseudonymTemplate:
+    """The way new pseudonyms are generated in PIMS for a single pseudonym type
+
+    """
+
+    def __init__(self, template_string, pseudonym_class):
+        """Create a new pseudonym template
+
+        Parameters
+        ----------
+        template_string: str
+            string representing template. See PIMS documentation for options
+        pseudonym_class: class
+            The TypedPseudonym class for which this template holds
+
+        Notes
+        -----
+        In this client library a 'PseudonymTemplate' is the template used for generating values for a single datatype
+        In a PIMS KeyFile, 'pseudonym template' refers to a long string representing templates for ALL datatypes,
+        separated by a separator. The PIMS naming is outdated as it was not designed with multiple datatypes in mind
+        therefore the client library will not follow this naming
+
+        """
+        self.template_string = template_string
+        self.pseudonym_class = pseudonym_class
+
+    def as_pims_string(self):
+        return f":{self.pseudonym_class.value_type}|{self.template_string}"
+
+
+class PimsClientException(Exception):
+    pass
+
+
+class TypedKeyFactoryException(PimsClientException):
+    pass
+
+
+class InvalidPseudonymTemplateException(PimsClientException):
     pass

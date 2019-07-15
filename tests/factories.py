@@ -196,11 +196,11 @@ class RequestsMockResponseExamples:
     KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE = (  # response after successful re-identify of 2 pseudonyms
         200,
         '{"Count":2,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"Pseudonyms","Type":null,'
-        '"Keys":[166741,166742],"Action":4,"Values":["e09234165-218c-46cc-8e2a-2d0da1836abd",'
-        '"9693340a80-dccf-4444-86ab-9762aab9d623"]},{"Name":"Identity","Type":["Identity","Identity"],'
+        '"Keys":[166741,166742],"Action":4,"Values":["test",'
+        '"test2"]},{"Name":"Identity","Type":["Identity","Identity"],'
         '"Keys":[166741,166742],"Action":4,"Values":["sjoerd_kerkstra","secret"]},{"Name":"Identity Source",'
-        '"Type":["IdentitySource","IdentitySource"],"Keys":[166741,166742],"Action":4,"Values":["sjoerd_zelf",'
-        '"sjoerd_test_source"]}]}',
+        '"Type":["IdentitySource","IdentitySource"],"Keys":[166741,166742],"Action":4,"Values":["PatientID",'
+        '"PatientID"]}]}',
     )
 
     GET_USER_BY_ID_RESPONSE = (  # Call to 'api/Users/{KeyFileKey}/Details'

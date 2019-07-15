@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from pimsclient.client import TypedPseudonym
+from pimsclient.client import TypedPseudonym, PseudoPatientID
 from pimsclient.swagger import KeyFile, User, KeyFiles, Users, Identifier
 from tests.factories import (
     UserFactory,
@@ -66,7 +66,7 @@ def test_keyfiles_pseudonymize(mock_pims_session):
         ],
     )
     assert len(pseudonyms) == 2
-    assert pseudonyms[0].pseudonym.value == 'e09234165-218c-46cc-8e2a-2d0da1836abd'
+    assert pseudonyms[0].pseudonym.value == 'test'
 
 
 def test_keyfiles_pseudonymize_different_sources(mock_pims_session):
@@ -93,12 +93,12 @@ def test_keyfiles_reidentify(mock_pims_session):
 
     keys = entrypoint.reidentify(
         key_file=KeyFileFactory(), pseudonyms=[
-            TypedPseudonym(value='test'),
-            TypedPseudonym(value='test2')]
+            PseudoPatientID(value='test'),
+            PseudoPatientID(value='test2')]
     )
 
     assert len(keys) == 2
-    assert keys[0].identifier.source == "sjoerd_zelf"
+    assert keys[0].identifier.source == "PatientID"
 
 
 def test_keyfiles_get_users(mock_pims_session):

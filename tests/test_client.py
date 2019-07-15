@@ -3,7 +3,8 @@ from unittest.mock import Mock
 import pytest
 
 from pimsclient.client import Project, KeyTypeFactory, TypedKeyFactoryException, NoConnectionException, \
-    PIMSConnection, TypedPseudonym
+    PIMSConnection, TypedPseudonym, PseudonymTemplate, PseudoPatientID, PseudoStudyInstanceUID, \
+    InvalidPseudonymTemplateException, PseudoSeriesInstanceUID
 from pimsclient.swagger import Key
 from tests.factories import IdentifierFactory, PseudonymFactory, TypedKeyFactory, RequestsMockResponseExamples, \
     KeyFileFactory, TypedPseudonymFactory, TypedIdentifierFactory
@@ -37,6 +38,38 @@ def test_project_functions(mock_project):
 
     keys = mock_project.reidentify(pseudonyms=[])
     assert len(keys) == 20
+
+
+@pytest.mark.parametrize("should_have, should_exist",
+                         [([PseudoPatientID], [PseudonymTemplate(template_string='#1.2,3.|N14|#.|N14',
+                                                                 pseudonym_class=PseudoStudyInstanceUID)]),
+                          ([PseudoPatientID], []),
+                          ([PseudoPatientID, PseudoStudyInstanceUID], []),
+                          ([], [])
+                          ])
+def test_project_assert_pseudonym_templates_working(mock_project, should_have, should_exist):
+    example_pims_template = "Guid|:PatientID|#Patient|S6|:StudyInstanceUID|#1.2,3.|N14|#.|N14"
+    mock_project.get_pims_pseudonym_template = lambda: example_pims_template
+
+    mock_project.assert_pseudonym_templates(should_have_a_template=should_have,
+                                            should_exist=should_exist)
+
+
+@pytest.mark.parametrize("should_have, should_exist",
+                         [([PseudoPatientID], [PseudonymTemplate(template_string='#youhavetohavethis',
+                                                                 pseudonym_class=PseudoStudyInstanceUID)]),
+                          ([PseudoSeriesInstanceUID], []),
+                          ([PseudoPatientID, PseudoSeriesInstanceUID], []),
+                          ])
+def test_project_assert_pseudonym_templates_failing(mock_project, should_have, should_exist):
+    example_pims_template = "Guid|:PatientID|#Patient|S6|:StudyInstanceUID|#1.2,3.|N14|#.|N14"
+    mock_project.get_pims_pseudonym_template = lambda: example_pims_template
+
+    with pytest.raises(InvalidPseudonymTemplateException):
+        mock_project.assert_pseudonym_templates(should_have_a_template=should_have,
+                                                should_exist=should_exist)
+
+
 
 
 def test_typed_key_factory_exception():
@@ -78,3 +111,7 @@ def test_str():
 
     assert string
 
+
+def test_pseudonym_template():
+    pid_template = PseudonymTemplate(template_string="#Patient|S6", pseudonym_class=PseudoPatientID)
+    assert pid_template.as_pims_string() == ':PatientID|#Patient|S6'
