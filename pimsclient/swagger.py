@@ -233,13 +233,14 @@ class KeyFiles(SwaggerEntryPoint):
 
         Returns
         -------
-        int
-            PIMS action ID for this deidentification
+        List[int]
+            PIMS deidentification action ID for each 1000 items
 
         """
 
         url = f"{self.url}/{key_file.key}/Files/Deidentify"
         page_size = 1000  # happens to be the limit for this server
+        action_ids = []
 
         while values:
             values_chunk = values[:page_size]
@@ -252,8 +253,9 @@ class KeyFiles(SwaggerEntryPoint):
                       'CreateOutputfile': True,
                       'overwrite': 'Overwrite',
                       'PageSize': page_size}
+            action_ids.append(self.session.post(url, params=params, json_payload=data))
 
-        return self.session.post(url, params=params, json_payload=data)
+        return action_ids
 
     def reidentify(self, key_file, pseudonyms, chunk_size=500):
         """Find the identifiers linked to the given pseudonyms.
