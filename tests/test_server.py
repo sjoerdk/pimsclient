@@ -14,7 +14,8 @@ from tests.factories import UserFactory, RequestsMock, RequestsMockResponseExamp
         RequestsMockResponseExamples.REQUESTED_RESOURCE_DOES_NOT_SUPPORT,
         RequestsMockResponseExamples.UKNOWN_URL,
         RequestsMockResponseExamples.UNAUTHORIZED,
-        RequestsMockResponseExamples.INVALID_API_REQUEST
+        RequestsMockResponseExamples.INVALID_API_REQUEST,
+        RequestsMockResponseExamples.UNKNOWN_ERROR
     ],
 )
 def test_swagger_error_responses(mock_pims_session, mock_response):

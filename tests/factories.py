@@ -183,6 +183,8 @@ class RequestsMockResponseExamples:
         r'{Message":"The requested resource does not support http method \'GET\'}',
     )
 
+    UNKNOWN_ERROR = (781, r': "Excessively Exotic Error"')
+
     UKNOWN_URL = (
         404,
         r'"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" '

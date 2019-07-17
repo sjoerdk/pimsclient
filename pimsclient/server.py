@@ -94,7 +94,9 @@ class PIMSSession:
             If an action is not allowed by PIMS for the logged in user
 
         """
-        if response.status_code == 400:
+        if response.status_code == 200:
+            return response
+        elif response.status_code == 400:
             raise BadRequest(response.text)
         elif response.status_code == 401:
             raise Unauthorized(
@@ -106,8 +108,9 @@ class PIMSSession:
             raise OperationNotSupported(response.text)
         elif response.status_code == 404:
             raise ResourceNotFound(response.text)
-
-        return response
+        else:
+            msg = f"Server returned status_code '{response.status_code}': {response.text}"
+            raise PIMSServerException(msg)
 
 
 class PIMSServer:

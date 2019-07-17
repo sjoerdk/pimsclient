@@ -185,7 +185,7 @@ class KeyFiles(SwaggerEntryPoint):
         fields = self.session.get(url)
         return [KeyFile.from_dict(x) for x in fields["Data"]]
 
-    def pseudonymize(self, key_file, identifiers, chunk_size=20):
+    def pseudonymize(self, key_file, identifiers):
         """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
         have PIMS generate a new pseudonym and return that.
 
@@ -195,8 +195,6 @@ class KeyFiles(SwaggerEntryPoint):
             The identifiers to get pseudonyms for
         key_file: KeyFile
             The key_file to use
-        chunk_size: int, optional
-            Maximum number of identifiers to process per API call. Defaults to 20
 
         Notes
         -----
@@ -209,45 +207,55 @@ class KeyFiles(SwaggerEntryPoint):
             The PIMS pseudonym for each identifier
 
         """
-        url = f"{self.url}/{key_file.key}/Files/Deidentify"
-        reidentify_url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
-
-        keys = []
         # Each call to process a list of identifiers only allows a single source. Split identifiers by source
         per_source = defaultdict(list)
         for x in identifiers:
             per_source[x.source].append(x)
         for source, items in per_source.items():
-            while items:
-                items_chunk = items[:chunk_size]
-                items = items[chunk_size:]
-                data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
-                         "values":[x.value for x in items_chunk] + [""]}]  # add empty item because of bug in PIMS (#8671)
+            # this needs two calls. First call to create new pseudonyms
+            self.deidentify(key_file, [x.value for x in items], source)
 
-                params = {'FileName': 'DataEntry',
-                          'identity_source': source,
-                          'CreateOutputfile': True,
-                          'overwrite': 'Overwrite'}
+        # Second to get back the pseudonyms that were created
+        return self.get_pseudonyms(key_file, identifiers, chunk_size=30)
 
-                # this needs two calls. First call to create new pseudonyms
-                self.session.post(url, params=params, json_payload=data)
+    def deidentify(self, key_file, values, source):
+        """Direct mapping to /Deidentify. Send items to PIMS to be assigned a pseudonym
+        Will split values over multiple API calls when there are too many to fit in single API request.
 
-                # Second to get back the pseudonyms that were created
-                fields = self.session.post(
-                        reidentify_url,
-                        params={
-                            "ReturnIdentity": True,
-                            "ReturnColumns": "*",
-                            "IdentitySource": source,
-                            "items": [x.value for x in items_chunk],
-                        },
-                )
+        Parameters
+        ----------
+        key_file: KeyFile
+            The key_file to use
+        values: List[str]
+            Values to deidentify
+        source: str
+            source to register in PIMS for each value. Typically one of client.ValueTypes
 
-                keys = keys + self.fields_to_keys(fields)
+        Returns
+        -------
+        int
+            PIMS action ID for this deidentification
 
-        return keys
+        """
 
-    def reidentify(self, key_file, pseudonyms, chunk_size=20):
+        url = f"{self.url}/{key_file.key}/Files/Deidentify"
+        page_size = 1000  # happens to be the limit for this server
+
+        while values:
+            values_chunk = values[:page_size]
+            values = values[page_size:]
+
+            data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
+                     "values": [x for x in values_chunk] + [""]}]  # add empty item because of bug in PIMS (#8671)
+            params = {'FileName': 'DataEntry',
+                      'identity_source': source,
+                      'CreateOutputfile': True,
+                      'overwrite': 'Overwrite',
+                      'PageSize': page_size}
+
+        return self.session.post(url, params=params, json_payload=data)
+
+    def reidentify(self, key_file, pseudonyms, chunk_size=500):
         """Find the identifiers linked to the given pseudonyms.
 
         Parameters
@@ -257,7 +265,7 @@ class KeyFiles(SwaggerEntryPoint):
         pseudonyms: List[Pseudonym]
             The pseudonyms to get identifiers for
         chunk_size: int, optional
-            Maximum number of identifiers to process per API call. Defaults to 20
+            Maximum number of identifiers to process per API call. Defaults to 500
 
         Notes
         -----
@@ -286,14 +294,62 @@ class KeyFiles(SwaggerEntryPoint):
                         "ReturnIdentity": True,
                         "ReturnColumns": "*",
                         "items": [x.value for x in items_chunk],
+                        'PageSize': chunk_size
+                    },
+                )
+                #  If multiple data types have the same pseudonym value, PIMS will return all. E.g. is there is a
+                #  patient and a study that are both called '1234', PIMS will return 2 results for one query to '1234'.
+                #  Filter only the results that were asked for. This cannot be filtered properly in the POST request.
+                keys = keys + [x for x in self.fields_to_keys(fields) if x.source() == source]
+
+        return keys
+
+    def get_pseudonyms(self, key_file, identifiers, chunk_size=500):
+        """Find the pseudonyms linked to the given identifiers
+
+        Parameters
+        ----------
+        key_file: KeyFile
+            The key_file to use
+        identifiers: List[Identifier]
+            The pseudonyms to get identifiers for
+        chunk_size: int, optional
+            Maximum number of identifiers to process per API call. Defaults to 500
+
+        Notes
+        -----
+        * Returned list might be shorter than input list. For unknown pseudonyms no keys are returned
+        * Every unique source in pseudonyms list yields one https call to API
+
+        Returns
+        -------
+        List[Key]
+            A list of pseudonym-identifier keys
+
+        """
+        url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
+
+        keys = []
+        per_source = defaultdict(list)
+        for x in identifiers:
+            per_source[x.source].append(x)
+        for source, items in per_source.items():
+            while items:
+                items_chunk = items[:chunk_size]
+                items = items[chunk_size:]
+                fields = self.session.post(
+                    url,
+                    params={
+                        "ReturnIdentity": True,
+                        "ReturnColumns": "*",
+                        "items": [x.value for x in items_chunk],
+                        "IdentitySource": source,
+                        'PageSize': chunk_size
                     },
                 )
                 keys = keys + self.fields_to_keys(fields)
 
-        #  If multiple data types have the same pseudonym value, PIMS will return all. E.g. is there is a patient and
-        #  a study that are both called '1234', PIMS will return 2 results for one query to '1234'. Filter only the
-        #  results that were asked for.
-        return [x for x in keys if x.pseudonym in pseudonyms]
+        return keys
 
     @staticmethod
     def fields_to_keys(fields):
@@ -428,6 +484,10 @@ class Key:
             identifier=Identifier(value=identity, source=identity_source),
             pseudonym=Pseudonym(value=pseudonym, source=identity_source),
         )
+
+    def source(self):
+        """Returns the source for this key. Source should be the same in both identifier and pseudonym """
+        return self.identifier.source
 
     def __str__(self):
         return f"Key {self.pseudonym.value}"

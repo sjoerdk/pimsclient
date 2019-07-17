@@ -1,4 +1,4 @@
-"""Connect to a PIMS server, anonymize some identifyers, then re-identify the pseudonyms you get back
+"""Pseudonymize and re-identify using the hopefully more understandable
 
 """
 from pimsclient.client import connect, PatientID, PseudoPatientID

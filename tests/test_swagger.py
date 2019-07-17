@@ -86,18 +86,19 @@ def test_keyfiles_pseudonymize_different_sources(mock_pims_session):
 
 
 def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
-    """In live testing the PIMS server was found not to be able to handle API requests with more then 20 items
+    """In live testing the PIMS server was found not to be able to handle API requests with more then 1000 items
     Check the chunking system to work around this"""
+
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
     )
     entrypoint = KeyFiles(mock_pims_session)
     _ = entrypoint.pseudonymize(
         key_file=KeyFileFactory(),
-        identifiers=[PatientIDFactory() for _ in range(100)],
+        identifiers=[PatientIDFactory() for _ in range(2000)],
     )
     values_posted = mock_pims_session.session.requests_mock.post.mock_calls[0][2]['json'][0]['values']
-    assert len(values_posted) <= 21
+    assert len(values_posted) <= 1001
 
 
 def test_keyfiles_reidentify(mock_pims_session):
@@ -123,10 +124,10 @@ def test_keyfiles_reidentify_chunked(mock_pims_session):
     entrypoint = KeyFiles(mock_pims_session)
 
     _ = entrypoint.reidentify(
-        key_file=KeyFileFactory(), pseudonyms=[PseudoPatientIDFactory() for _ in range(100)]
+        key_file=KeyFileFactory(), pseudonyms=[PseudoPatientIDFactory() for _ in range(2000)]
     )
     reidentified_items = mock_pims_session.session.requests_mock.post.mock_calls[0][2]['params']['items']
-    assert len(reidentified_items) <= 21
+    assert len(reidentified_items) <= 501
 
 
 def test_keyfiles_get_users(mock_pims_session):
