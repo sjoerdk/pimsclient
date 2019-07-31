@@ -55,34 +55,34 @@ def test_keyfiles_entrypoint(mock_pims_session):
 def test_keyfiles_pseudonymize(mock_pims_session):
     """Get a pseudonym, mock server response"""
     mock_pims_session.session.set_response_tuple(
-        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     entrypoint = KeyFiles(mock_pims_session)
-    pseudonyms = entrypoint.pseudonymize(
+    keys = entrypoint.pseudonymize(
         key_file=KeyFileFactory(),
         identifiers=[
             Identifier(value="Jack de Boer", source="Test"),
             Identifier(value="Chris van Os", source="Test"),
         ],
     )
-    assert len(pseudonyms) == 2
-    assert pseudonyms[0].pseudonym.value == 'test'
+    assert len(keys) == 2
+    keys[0].identifier.value == 'Jack de Boer'
 
 
 def test_keyfiles_pseudonymize_different_sources(mock_pims_session):
     """Get a pseudonym, mock server response. Two different sources should yield separate calls for each source"""
     mock_pims_session.session.set_response_tuple(
-        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     entrypoint = KeyFiles(mock_pims_session)
-    pseudonyms = entrypoint.pseudonymize(
+    keys = entrypoint.pseudonymize(
         key_file=KeyFileFactory(),
         identifiers=[
             Identifier(value="Jack de Boer", source="Test"),
             Identifier(value="Sarah Toh", source="Test_2"),
         ],
     )
-    assert len(pseudonyms) == 4
+    assert mock_pims_session.session.requests_mock.post.call_count == 2
 
 
 def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
@@ -90,7 +90,7 @@ def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
     Check the chunking system to work around this"""
 
     mock_pims_session.session.set_response_tuple(
-        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     entrypoint = KeyFiles(mock_pims_session)
     _ = entrypoint.pseudonymize(

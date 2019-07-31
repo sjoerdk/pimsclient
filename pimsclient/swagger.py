@@ -207,16 +207,15 @@ class KeyFiles(SwaggerEntryPoint):
             The PIMS pseudonym for each identifier
 
         """
+        keys = []
         # Each call to process a list of identifiers only allows a single source. Split identifiers by source
         per_source = defaultdict(list)
         for x in identifiers:
             per_source[x.source].append(x)
         for source, items in per_source.items():
-            # this needs two calls. First call to create new pseudonyms
-            self.deidentify(key_file, [x.value for x in items], source)
+            keys = keys + self.deidentify(key_file, [x.value for x in items], source)
 
-        # Second to get back the pseudonyms that were created
-        return self.get_pseudonyms(key_file, identifiers, chunk_size=30)
+        return keys
 
     def deidentify(self, key_file, values, source):
         """Direct mapping to /Deidentify. Send items to PIMS to be assigned a pseudonym
@@ -233,14 +232,14 @@ class KeyFiles(SwaggerEntryPoint):
 
         Returns
         -------
-        List[int]
-            PIMS deidentification action ID for each 1000 items
+        List[Key]
+            The PIMS pseudonym for each identifier
 
         """
 
         url = f"{self.url}/{key_file.key}/Files/Deidentify"
         page_size = 1000  # happens to be the limit for this server
-        action_ids = []
+        keys = []
 
         while values:
             values_chunk = values[:page_size]
@@ -250,12 +249,17 @@ class KeyFiles(SwaggerEntryPoint):
                      "values": [x for x in values_chunk] + [""]}]  # add empty item because of bug in PIMS (#8671)
             params = {'FileName': 'DataEntry',
                       'identity_source': source,
-                      'CreateOutputfile': True,
+                      'CreateJsonOutput': True,
                       'overwrite': 'Overwrite',
                       'PageSize': page_size}
-            action_ids.append(self.session.post(url, params=params, json_payload=data))
 
-        return action_ids
+            pseudonyms = self.parse_deidentify_response(self.session.post(url, params=params, json_payload=data))
+
+            keys = keys + [Key.init_from_strings(pseudonym=x,
+                                                 identity=y,
+                                                 identity_source=source) for x, y in zip(pseudonyms, values_chunk)]
+
+        return keys
 
     def reidentify(self, key_file, pseudonyms, chunk_size=500):
         """Find the identifiers linked to the given pseudonyms.
@@ -353,6 +357,30 @@ class KeyFiles(SwaggerEntryPoint):
 
         return keys
 
+    def get_pseudonyms_by_action(self, key_file, action_id):
+        """Find the pseudonyms linked to the given action_id
+
+        Parameters
+        ----------
+        key_file: KeyFile
+            The key_file to use
+        action_id: int
+            action id to get
+
+        Returns
+        -------
+        List[Key]
+            A list of pseudonym-identifier keys
+
+        """
+        url = f"{self.url}/{key_file.key}/Pseudonyms/Action/{action_id}"
+
+        fields = self.session.get(url)
+
+        test = self.fields_to_keys(fields)
+
+        return fields
+
     @staticmethod
     def fields_to_keys(fields):
         """Parses standard multi-key API response to a list of Keys
@@ -383,6 +411,36 @@ class KeyFiles(SwaggerEntryPoint):
         url = f"{self.url}/{key_file.key}/Users"
         fields = self.session.get(url)
         return [User.from_dict(x) for x in fields["Data"]]
+
+    @staticmethod
+    def parse_deidentify_response(response):
+        """Parse the response of /Keyfiles/{KeyfileKey}/Files/Deidentify when CreatJsonOutput=True has been passed.
+
+        This function was added later to the API and I don't trust it fully. Do some extra sanity checks
+
+        Parameters
+        ----------
+        response: Dict
+            Response from sever, already parsed to dictionary
+
+        Raises
+        ------
+        DeidentifyResponseParsingException
+            When the response contains more than one pseudonym for any identity. This could potentially happen when two
+            identifiers have different identifier_source values. This code has not been designed for this.
+
+        Returns
+        -------
+        List[str]
+            list of pseudonyms that were created
+
+        """
+
+        try:
+            return [pseudonym for _, pseudonym in response['Data']]
+        except ValueError as e:
+            msg = f"Expected an empty line and a pseudonym. Error: '{e}'.."
+            raise DeidentifyResponseParsingException(msg)
 
 
 class Users(SwaggerEntryPoint):
@@ -493,3 +551,11 @@ class Key:
 
     def __str__(self):
         return f"Key {self.pseudonym.value}"
+
+
+class PIMSSwaggerException(Exception):
+    pass
+
+
+class DeidentifyResponseParsingException(PIMSSwaggerException):
+    pass

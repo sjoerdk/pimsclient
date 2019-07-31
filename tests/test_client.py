@@ -5,7 +5,7 @@ import pytest
 from pimsclient.client import Project, KeyTypeFactory, TypedKeyFactoryException, NoConnectionException, \
     PIMSConnection, TypedPseudonym, PseudonymTemplate, PseudoPatientID, PseudoStudyInstanceUID, \
     InvalidPseudonymTemplateException, PseudoSeriesInstanceUID
-from pimsclient.swagger import Key
+from pimsclient.swagger import Key, PIMSSwaggerException
 from tests.factories import IdentifierFactory, PseudonymFactory, TypedKeyFactory, RequestsMockResponseExamples, \
     KeyFileFactory, TypedPseudonymFactory, TypedIdentifierFactory
 
@@ -98,9 +98,13 @@ def test_typed_key_factory(value_type):
 def test_pimsconnection(mock_pims_session):
     connection = PIMSConnection(session=mock_pims_session)
     mock_pims_session.session.set_response_tuple(
-        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     connection.pseudonymize(key_file=KeyFileFactory(), identifiers=[IdentifierFactory()])
+
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+    )
     connection.reidentify(key_file=KeyFileFactory(), pseudonyms=[PseudonymFactory()])
 
 
@@ -115,3 +119,21 @@ def test_str():
 def test_pseudonym_template():
     pid_template = PseudonymTemplate(template_string="#Patient|S6", pseudonym_class=PseudoPatientID)
     assert pid_template.as_pims_string() == ':PatientID|#Patient|S6'
+
+
+def test_deidentify(mock_pims_session):
+    connection = PIMSConnection(session=mock_pims_session)
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
+    )
+    identifiers = [IdentifierFactory(), IdentifierFactory()]
+    keys = connection.pseudonymize(key_file=KeyFileFactory(), identifiers=identifiers)
+    assert len(keys) == 2
+    assert str(keys[0].identifier) == str(identifiers[0])
+
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID
+    )
+
+    with pytest.raises(PIMSSwaggerException) as e:
+        connection.pseudonymize(key_file=KeyFileFactory(), identifiers=identifiers)

@@ -244,3 +244,15 @@ class RequestsMockResponseExamples:
         ' "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "key_file owner", "Deleted": false } ], "More": false,'
         ' "Deleted": false } ]}',
     )
+
+    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE = (  # response after posting 2 ids to  /Keyfiles/{KeyfileKey}}/Files/Deidentify'
+        200,
+        r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6"]]}'
+    )
+
+    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID = (  # same as above, but returns multiple pseudonyms per identity.
+        200,
+        r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}'
+    )
