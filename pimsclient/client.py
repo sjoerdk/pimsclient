@@ -5,7 +5,7 @@
 This module adds one level above the Swagger level, abstracting away details and making it easy to work with multiple
 types of pseudonym under a single project description
 """
-from pimsclient.server import PIMSServer
+from pimsclient.server import PIMSServer, PIMSServerException
 from pimsclient.swagger import Identifier, Pseudonym, KeyFiles, Users, Key
 
 
@@ -71,17 +71,31 @@ class Project:
     def get_key_file(self):
         """Caches keyfile got from PIMS locally
 
+        Raises
+        ------
+        PIMSProjectException
+            If keyfile cannot be got for any reason
+
         Returns
         -------
         KeyFile
             The keyfile that this project stores its data in
         """
         if not self._key_file:
-            self._key_file = self.connection.get_key_file(key=self.key_file_id)
+            try:
+                self._key_file = self.connection.get_key_file(key=self.key_file_id)
+            except PIMSServerException as e:
+                raise PIMSProjectException(f"Error getting key file from server: {e}")
         return self._key_file
 
     def get_name(self):
         """
+
+        Raises
+        ------
+        PIMSProjectException
+            If name cannot be got for any reason
+
 
         Returns
         -------
@@ -93,6 +107,11 @@ class Project:
 
     def get_pims_pseudonym_template(self):
         """
+
+        Raises
+        ------
+        PIMSProjectException
+            If template cannot be got for any reason
 
         Returns
         -------
@@ -109,6 +128,11 @@ class Project:
         ----------
         identifiers: List[TypedIdentifier]
             identifiers to pseudonymize
+
+        Raises
+        ------
+        PIMSProjectException
+            If pseudonymization fails
 
         Returns
         -------
@@ -129,6 +153,10 @@ class Project:
         ----------
         pseudonyms: List[TypedPseudonym]
             list of pseudonyms to process
+
+        Raises
+        ------
+        PIMSProjectException
 
         Returns
         -------
@@ -164,6 +192,8 @@ class Project:
 
         Raises
         ------
+        PIMSProjectException
+            When assertion cannot be done. For example when connection to server fails.
         InvalidPseudonymTemplateException:
             When this project's template is not as expected
 
@@ -203,6 +233,11 @@ class PIMSConnection:
         ----------
         key: int or str
             key for the key_file to get
+
+        Raises
+        ------
+        PIMSServerException
+            When key file cannot be got for some reason
 
         Returns
         -------
@@ -498,13 +533,17 @@ class PseudonymTemplate:
         return f":{self.pseudonym_class.value_type}|{self.template_string}"
 
 
-class PimsClientException(Exception):
+class PIMSClientException(Exception):
     pass
 
 
-class TypedKeyFactoryException(PimsClientException):
+class PIMSProjectException(PIMSClientException):
     pass
 
 
-class InvalidPseudonymTemplateException(PimsClientException):
+class TypedKeyFactoryException(PIMSClientException):
+    pass
+
+
+class InvalidPseudonymTemplateException(PIMSClientException):
     pass

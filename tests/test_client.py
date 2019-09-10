@@ -4,7 +4,8 @@ import pytest
 
 from pimsclient.client import Project, KeyTypeFactory, TypedKeyFactoryException, NoConnectionException, \
     PIMSConnection, TypedPseudonym, PseudonymTemplate, PseudoPatientID, PseudoStudyInstanceUID, \
-    InvalidPseudonymTemplateException, PseudoSeriesInstanceUID
+    InvalidPseudonymTemplateException, PseudoSeriesInstanceUID, PIMSProjectException
+from pimsclient.server import PIMSServerException
 from pimsclient.swagger import Key, PIMSSwaggerException
 from tests.factories import IdentifierFactory, PseudonymFactory, TypedKeyFactory, RequestsMockResponseExamples, \
     KeyFileFactory, TypedPseudonymFactory, TypedIdentifierFactory
@@ -30,6 +31,13 @@ def test_project_no_connection():
 
     with pytest.raises(NoConnectionException):
         project.pseudonymize(identifiers=[])
+
+
+def test_project_get_key_file_fails(mock_project):
+    mock_project.connection.get_key_file.side_effect = PIMSServerException("Terrible server error")
+
+    with pytest.raises(PIMSProjectException):
+        mock_project.reidentify(pseudonyms=[])
 
 
 def test_project_functions(mock_project):
@@ -68,8 +76,6 @@ def test_project_assert_pseudonym_templates_failing(mock_project, should_have, s
     with pytest.raises(InvalidPseudonymTemplateException):
         mock_project.assert_pseudonym_templates(should_have_a_template=should_have,
                                                 should_exist=should_exist)
-
-
 
 
 def test_typed_key_factory_exception():

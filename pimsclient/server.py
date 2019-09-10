@@ -90,9 +90,12 @@ class PIMSSession:
 
         Raises
         ------
-        OperationForbidden
+        OperationForbidden(PIMSServerException)
             If an action is not allowed by PIMS for the logged in user
-
+        ResourceNotFound(PIMSServerException)
+            If a 404 is returned
+        OperationNotSupported(PIMSServerException)
+            If a 405 is found
         """
         if response.status_code == 200:
             return response
@@ -114,7 +117,7 @@ class PIMSSession:
 
 
 class PIMSServer:
-    """A connection to a PIMS API
+    """A PIMS server at a certain url
     """
 
     def __init__(self, url):

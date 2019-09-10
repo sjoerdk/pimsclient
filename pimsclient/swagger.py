@@ -160,6 +160,11 @@ class KeyFiles(SwaggerEntryPoint):
         key: int or str
             key for the key_file to get
 
+        Raises
+        ------
+        PIMSServerException
+            If anything goes wrong getting
+
         Returns
         -------
         KeyFile
