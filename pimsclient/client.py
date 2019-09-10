@@ -9,7 +9,7 @@ from pimsclient.server import PIMSServer
 from pimsclient.swagger import Identifier, Pseudonym, KeyFiles, Users, Key
 
 
-def connect(pims_url, pims_key_file_id):
+def connect(pims_url, pims_key_file_id, user=None, password=None):
     """Convenience function to create a project connected to a keyfile
 
     Parameters
@@ -18,6 +18,10 @@ def connect(pims_url, pims_key_file_id):
         url to PIMS swagger API
     pims_key_file_id: int
         PIMS id for the keyfile you are trying to link to
+    user: str, optional
+        username to connect to PIMS API use, defaults to reading environment key ['PIMS_CLIENT_USER']
+    password: str, optional
+        password to connect to PIMS API, defaults to reading environment key ['PIMS_CLIENT_PASSWORD']
 
     Returns
     -------
@@ -25,7 +29,7 @@ def connect(pims_url, pims_key_file_id):
         A project connected to keyfile
 
     """
-    connection = PIMSConnection(session=PIMSServer(pims_url).get_session())
+    connection = PIMSConnection(session=PIMSServer(pims_url).get_session(user=user, password=password))
     return Project(key_file_id=pims_key_file_id, connection=connection)
 
 
