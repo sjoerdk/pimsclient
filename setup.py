@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""The setup script."""
+'''The setup script.'''
 
 from setuptools import setup, find_packages
 
@@ -18,7 +18,7 @@ setup_requirements = ['pytest-runner', ]
 test_requirements = ['pytest', ]
 
 setup(
-    author="Sjoerd Kerkstra",
+    author='Sjoerd Kerkstra',
     author_email='sjoerd.kerkstra@radboudumc.nl',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -27,9 +27,9 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Client for PIMS key_file management swagger web API",
+    description='Client for PIMS key_file management swagger web API',
     install_requires=requirements,
-    license="MIT license",
+    license='MIT license',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='pimsclient',
@@ -39,6 +39,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/sjoerdk/pimsclient',
-    version='version="0.3.1"',
+    version='0.3.1',
     zip_safe=False,
 )

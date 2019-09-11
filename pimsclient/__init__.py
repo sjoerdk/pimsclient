@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for pimsclient."""
+'''Top-level package for pimsclient.'''
 
-__author__ = """Sjoerd Kerkstra"""
-__email__ = "sjoerd.kerkstra@radboudumc.nl"
-__version__ = "0.3.1"
+__author__ = '''Sjoerd Kerkstra'''
+__email__ = 'sjoerd.kerkstra@radboudumc.nl'
+__version__ = '0.3.1'
