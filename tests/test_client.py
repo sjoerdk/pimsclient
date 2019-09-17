@@ -78,6 +78,25 @@ def test_project_assert_pseudonym_templates_failing(mock_project, should_have, s
                                                 should_exist=should_exist)
 
 
+def test_project_assert_pseudonym_templates_realistic(mock_project):
+    """Test template checking with realistic values"""
+    example_pims_template = r"Guid|:PatientID|#Patient|S6|:StudyInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14" \
+                            r"|#.|N14|:SeriesInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14|#.|N14|" \
+                            r":SOPInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14|#.|N14 "
+    mock_project.get_pims_pseudonym_template = lambda: example_pims_template
+
+    expected_templates = [PseudoPatientID,
+                          PseudoStudyInstanceUID,
+                          PseudoSeriesInstanceUID]
+    mock_project.assert_pseudonym_templates(should_have_a_template=expected_templates,
+                                            should_exist=[])
+
+    mock_project.get_pims_pseudonym_template = lambda: "Guid"
+    with pytest.raises(InvalidPseudonymTemplateException):
+        mock_project.assert_pseudonym_templates(should_have_a_template=expected_templates,
+                                                should_exist=[])
+
+
 def test_typed_key_factory_exception():
     """Trying to create a typed key for an unknown type should fail"""
     key = Key(identifier=IdentifierFactory(source='UNKNOWN'), pseudonym=PseudonymFactory())
