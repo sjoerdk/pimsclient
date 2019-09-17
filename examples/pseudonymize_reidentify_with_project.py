@@ -4,7 +4,7 @@
 from pimsclient.client import connect, PatientID, PseudoPatientID
 
 # Create a project connected to a certain PIMS key file
-project = connect('https://pims.radboudumc.nl/api', pims_key_file_id=44)
+project = connect('https://pims.radboudumc.nl/api', pims_key_file_id=49)
 print(project.get_pims_pseudonym_template())
 
 # I have some patientID's I want to pseudonymize with PIMS

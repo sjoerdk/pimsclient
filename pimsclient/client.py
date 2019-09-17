@@ -5,6 +5,7 @@
 This module adds one level above the Swagger level, abstracting away details and making it easy to work with multiple
 types of pseudonym under a single project description
 """
+from pimsclient.exceptions import PIMSException
 from pimsclient.server import PIMSServer, PIMSServerException
 from pimsclient.swagger import Identifier, Pseudonym, KeyFiles, Users, Key
 
@@ -533,7 +534,7 @@ class PseudonymTemplate:
         return f":{self.pseudonym_class.value_type}|{self.template_string}"
 
 
-class PIMSClientException(Exception):
+class PIMSClientException(PIMSException):
     pass
 
 

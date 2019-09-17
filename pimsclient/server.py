@@ -6,6 +6,8 @@ from os import environ
 import requests
 from requests_ntlm import HttpNtlmAuth
 
+from pimsclient.exceptions import PIMSException
+
 
 class PIMSSession:
     """A logged in session with a PIMSServer
@@ -162,7 +164,7 @@ class PIMSServer:
         return PIMSSession(session=session, base_url=self.url)
 
 
-class PIMSServerException(Exception):
+class PIMSServerException(PIMSException):
     pass
 
 
