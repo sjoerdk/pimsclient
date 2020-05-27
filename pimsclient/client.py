@@ -309,9 +309,10 @@ class ValueTypes:
     STUDY_INSTANCE_UID = "StudyInstanceUID"
     SERIES_INSTANCE_UID = "SeriesInstanceUID"
     SOP_INSTANCE_UID = "SOPInstanceUID"
+    SALT = "Salt"
     NOT_SET = "NOT_SET"
 
-    all = [PATIENT_ID, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID]
+    all = [PATIENT_ID, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID, SALT]
 
 
 class TypedIdentifier(Identifier):
@@ -355,6 +356,10 @@ class SOPInstanceUID(TypedIdentifier):
     value_type = ValueTypes.SOP_INSTANCE_UID
 
 
+class SaltIdentifier(TypedIdentifier):
+    value_type = ValueTypes.SALT
+
+
 class TypedPseudonym(Pseudonym):
     """A pseudonym with a specific value_type.
 
@@ -383,6 +388,10 @@ class PseudoSeriesInstanceUID(TypedPseudonym):
 
 class PseudoSOPInstanceUID(TypedPseudonym):
     value_type = ValueTypes.SOP_INSTANCE_UID
+
+
+class PseudoSalt(TypedPseudonym):
+    value_type = ValueTypes.SALT
 
 
 class NoConnectionException(Exception):
