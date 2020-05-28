@@ -431,7 +431,8 @@ class KeyTypeFactory:
 
     identifier_class_map = {
         x.value_type: x
-        for x in [PatientID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID]
+        for x in [PatientID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID,
+                  SaltIdentifier]
     }
     pseudonym_class_map = {
         x.value_type: x
@@ -440,6 +441,7 @@ class KeyTypeFactory:
             PseudoStudyInstanceUID,
             PseudoSeriesInstanceUID,
             PseudoSOPInstanceUID,
+            PseudoSalt
         ]
     }
 
