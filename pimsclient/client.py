@@ -30,7 +30,9 @@ def connect(pims_url, pims_key_file_id, user=None, password=None):
         A project connected to keyfile
 
     """
-    connection = PIMSConnection(session=PIMSServer(pims_url).get_session(user=user, password=password))
+    connection = PIMSConnection(
+        session=PIMSServer(pims_url).get_session(user=user, password=password)
+    )
     return Project(key_file_id=pims_key_file_id, connection=connection)
 
 
@@ -201,15 +203,19 @@ class Project:
         """
         pims_template = self.get_pims_pseudonym_template()
         for typed_pseudonym in should_have_a_template:
-            if f':{typed_pseudonym.value_type}' not in pims_template:
-                msg = f'Could not find any template for "{typed_pseudonym}" in project {self} template "{pims_template}".' \
-                    f' This is required'
+            if f":{typed_pseudonym.value_type}" not in pims_template:
+                msg = (
+                    f'Could not find any template for "{typed_pseudonym}" in project {self} template "{pims_template}".'
+                    f" This is required"
+                )
                 raise InvalidPseudonymTemplateException(msg)
 
         for template in should_exist:
             if template.as_pims_string() not in pims_template:
-                msg = f'Could not find "{template.as_pims_string()}" in project {self} template "{pims_template}".' \
-                    f' This is required'
+                msg = (
+                    f'Could not find "{template.as_pims_string()}" in project {self} template "{pims_template}".'
+                    f" This is required"
+                )
                 raise InvalidPseudonymTemplateException(msg)
 
 
@@ -303,9 +309,10 @@ class ValueTypes:
     STUDY_INSTANCE_UID = "StudyInstanceUID"
     SERIES_INSTANCE_UID = "SeriesInstanceUID"
     SOP_INSTANCE_UID = "SOPInstanceUID"
+    SALT = "Salt"
     NOT_SET = "NOT_SET"
 
-    all = [PATIENT_ID, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID]
+    all = [PATIENT_ID, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID, SALT]
 
 
 class TypedIdentifier(Identifier):
@@ -349,6 +356,10 @@ class SOPInstanceUID(TypedIdentifier):
     value_type = ValueTypes.SOP_INSTANCE_UID
 
 
+class SaltIdentifier(TypedIdentifier):
+    value_type = ValueTypes.SALT
+
+
 class TypedPseudonym(Pseudonym):
     """A pseudonym with a specific value_type.
 
@@ -377,6 +388,10 @@ class PseudoSeriesInstanceUID(TypedPseudonym):
 
 class PseudoSOPInstanceUID(TypedPseudonym):
     value_type = ValueTypes.SOP_INSTANCE_UID
+
+
+class PseudoSalt(TypedPseudonym):
+    value_type = ValueTypes.SALT
 
 
 class NoConnectionException(Exception):
