@@ -486,7 +486,10 @@ class KeyTypeFactory:
             identifier_class = self.identifier_class_map[identifier.source]
             return identifier_class(identifier.value)
         except KeyError:
-            msg = f'Unknown value type "{identifier.source}". Known types: {list(self.identifier_class_map.keys())}'
+            msg = (
+                f'Unknown value type "{identifier.source}". Known types: '
+                f"{list(self.identifier_class_map.keys())}"
+            )
             raise TypedKeyFactoryException(msg)
 
     def create_typed_pseudonym(self, pseudonym, value_type):
