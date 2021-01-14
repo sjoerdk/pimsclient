@@ -161,7 +161,7 @@ class RequestsMock:
         return self.requests_mock.get.called or self.requests_mock.post.called
 
     @staticmethod
-    def session():
+    def Session():  # noqa: N802 capitalized to match Requests module function
         return Mock()
 
 
