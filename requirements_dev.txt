@@ -5,7 +5,7 @@ watchdog==0.10.2
 flake8==3.8.2
 tox==3.21.1
 coverage==5.1
-Sphinx==3.0.4
+Sphinx==3.4.3
 twine==3.1.1
 requests-ntlm==1.1.0
 pytest==5.4.2
