@@ -1,5 +1,5 @@
-"""
-Objects and classes that can be directly mapped to the PIMS Swagger API. Retrieving, Saving, Error handling
+"""Objects and classes that can be directly mapped to the PIMS Swagger API.
+Retrieving, Saving, Error handling
 
 """
 from collections import defaultdict
@@ -25,7 +25,7 @@ class SwaggerObject:
             an instance of this object
 
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def to_dict(self):
         """
@@ -36,7 +36,7 @@ class SwaggerObject:
             A dictionary representation of this object
 
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class KeyFile(SwaggerObject):
@@ -150,7 +150,7 @@ class KeyFiles(SwaggerEntryPoint):
     url_path = "/Keyfiles"
 
     def __init__(self, session):
-        super(KeyFiles, self).__init__(session)
+        super().__init__(session)
 
     def get(self, key):
         """Get a specific key_file
@@ -191,8 +191,8 @@ class KeyFiles(SwaggerEntryPoint):
         return [KeyFile.from_dict(x) for x in fields["Data"]]
 
     def pseudonymize(self, key_file, identifiers):
-        """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
-        have PIMS generate a new pseudonym and return that.
+        """Get a pseudonym for each identifier. If identifier is known in PIMS,
+        return this. Otherwise, have PIMS generate a new pseudonym and return that.
 
         Parameters
         ----------
@@ -250,19 +250,30 @@ class KeyFiles(SwaggerEntryPoint):
             values_chunk = values[:page_size]
             values = values[page_size:]
 
-            data = [{"Name": "Column 1", "Type": ["Pseudonymize"], "Action": "Pseudonymize",
-                     "values": [x for x in values_chunk] + [""]}]  # add empty item because of bug in PIMS (#8671)
-            params = {'FileName': 'DataEntry',
-                      'identity_source': source,
-                      'CreateJsonOutput': True,
-                      'overwrite': 'Overwrite',
-                      'PageSize': page_size}
+            data = [
+                {
+                    "Name": "Column 1",
+                    "Type": ["Pseudonymize"],
+                    "Action": "Pseudonymize",
+                    "values": [x for x in values_chunk] + [""],
+                }
+            ]  # add empty item because of bug in PIMS (#8671)
+            params = {
+                "FileName": "DataEntry",
+                "identity_source": source,
+                "CreateJsonOutput": True,
+                "overwrite": "Overwrite",
+                "PageSize": page_size,
+            }
 
-            pseudonyms = self.parse_deidentify_response(self.session.post(url, params=params, json_payload=data))
+            pseudonyms = self.parse_deidentify_response(
+                self.session.post(url, params=params, json_payload=data)
+            )
 
-            keys = keys + [Key.init_from_strings(pseudonym=x,
-                                                 identity=y,
-                                                 identity_source=source) for x, y in zip(pseudonyms, values_chunk)]
+            keys = keys + [
+                Key.init_from_strings(pseudonym=x, identity=y, identity_source=source)
+                for x, y in zip(pseudonyms, values_chunk)
+            ]
 
         return keys
 
@@ -305,13 +316,15 @@ class KeyFiles(SwaggerEntryPoint):
                         "ReturnIdentity": True,
                         "ReturnColumns": "*",
                         "items": [x.value for x in items_chunk],
-                        'PageSize': chunk_size
+                        "PageSize": chunk_size,
                     },
                 )
                 #  If multiple data types have the same pseudonym value, PIMS will return all. E.g. is there is a
                 #  patient and a study that are both called '1234', PIMS will return 2 results for one query to '1234'.
                 #  Filter only the results that were asked for. This cannot be filtered properly in the POST request.
-                keys = keys + [x for x in self.fields_to_keys(fields) if x.source() == source]
+                keys = keys + [
+                    x for x in self.fields_to_keys(fields) if x.source() == source
+                ]
 
         return keys
 
@@ -355,7 +368,7 @@ class KeyFiles(SwaggerEntryPoint):
                         "ReturnColumns": "*",
                         "items": [x.value for x in items_chunk],
                         "IdentitySource": source,
-                        'PageSize': chunk_size
+                        "PageSize": chunk_size,
                     },
                 )
                 keys = keys + self.fields_to_keys(fields)
@@ -380,11 +393,7 @@ class KeyFiles(SwaggerEntryPoint):
         """
         url = f"{self.url}/{key_file.key}/Pseudonyms/Action/{action_id}"
 
-        fields = self.session.get(url)
-
-        test = self.fields_to_keys(fields)
-
-        return fields
+        return self.session.get(url)
 
     @staticmethod
     def fields_to_keys(fields):
@@ -442,7 +451,7 @@ class KeyFiles(SwaggerEntryPoint):
         """
 
         try:
-            return [pseudonym for _, pseudonym in response['Data']]
+            return [pseudonym for _, pseudonym in response["Data"]]
         except ValueError as e:
             msg = f"Expected an empty line and a pseudonym. Error: '{e}'.."
             raise DeidentifyResponseParsingException(msg)
@@ -453,7 +462,7 @@ class Users(SwaggerEntryPoint):
     url_path = "/Users"
 
     def __init__(self, session):
-        super(Users, self).__init__(session)
+        super().__init__(session)
 
     def get(self, key):
         """Get a specific user
@@ -551,7 +560,9 @@ class Key:
         )
 
     def source(self):
-        """Returns the source for this key. Source should be the same in both identifier and pseudonym """
+        """Returns the source for this key. Source should be the same in both
+        identifier and pseudonym
+        """
         return self.identifier.source
 
     def __str__(self):

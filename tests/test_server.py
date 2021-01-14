@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import pytest
 
-from pimsclient.server import PIMSSession, PIMSServerException, PIMSServer
-from tests.factories import UserFactory, RequestsMock, RequestsMockResponseExamples
+from pimsclient.server import PIMSServerException, PIMSServer
+from tests.factories import RequestsMockResponseExamples
 
 
 @pytest.mark.parametrize(
@@ -15,12 +13,11 @@ from tests.factories import UserFactory, RequestsMock, RequestsMockResponseExamp
         RequestsMockResponseExamples.UKNOWN_URL,
         RequestsMockResponseExamples.UNAUTHORIZED,
         RequestsMockResponseExamples.INVALID_API_REQUEST,
-        RequestsMockResponseExamples.UNKNOWN_ERROR
+        RequestsMockResponseExamples.UNKNOWN_ERROR,
     ],
 )
 def test_swagger_error_responses(mock_pims_session, mock_response):
-    """Swagger API error responses should be caught in proper exceptions
-    """
+    """Swagger API error responses should be caught in proper exceptions"""
     mock_pims_session.session.set_response_tuple(mock_response)
     with pytest.raises(PIMSServerException):
         mock_pims_session.get(
@@ -31,19 +28,17 @@ def test_swagger_error_responses(mock_pims_session, mock_response):
         mock_pims_session.post("a_url", params={})
 
 
-def test_gemock_response_session(mock_requests, monkeypatch):
-    server = PIMSServer(url='Test')
+def test_mock_response_session(mock_requests, monkeypatch):
+    server = PIMSServer(url="Test")
 
-    with pytest.raises(PIMSServerException): #  no password defined, should raise exception
+    with pytest.raises(PIMSServerException):
+        # no password defined, should raise exception
         server.get_session()
 
     # this should work though
-    server.get_session(user='test', password='password')
+    server.get_session(user="test", password="password")
 
     # and this
-    monkeypatch.setenv('PIMS_CLIENT_USER', 'TestUser')
-    monkeypatch.setenv('PIMS_CLIENT_PASSWORD', 'TestPass')
+    monkeypatch.setenv("PIMS_CLIENT_USER", "TestUser")
+    monkeypatch.setenv("PIMS_CLIENT_PASSWORD", "TestPass")
     server.get_session()
-
-
-

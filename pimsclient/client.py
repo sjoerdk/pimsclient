@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
+"""Classes and functions for working with the PIMS pseudonym management system.
 
-""" Classes and functions for working with the PIMS pseudonym management system.
-
-This module adds one level above the Swagger level, abstracting away details and making it easy to work with multiple
-types of pseudonym under a single project description
+This module adds one level above the Swagger level, abstracting away details and
+making it easy to work with multiple types of pseudonym under a single project
+description
 """
 from pimsclient.exceptions import PIMSException
 from pimsclient.server import PIMSServer, PIMSServerException
@@ -20,9 +19,11 @@ def connect(pims_url, pims_key_file_id, user=None, password=None):
     pims_key_file_id: int
         PIMS id for the keyfile you are trying to link to
     user: str, optional
-        username to connect to PIMS API use, defaults to reading environment key ['PIMS_CLIENT_USER']
+        username to connect to PIMS API use, defaults to reading environment
+        key ['PIMS_CLIENT_USER']
     password: str, optional
-        password to connect to PIMS API, defaults to reading environment key ['PIMS_CLIENT_PASSWORD']
+        password to connect to PIMS API, defaults to reading environment
+        key ['PIMS_CLIENT_PASSWORD']
 
     Returns
     -------
@@ -253,8 +254,8 @@ class PIMSConnection:
         return self.key_files.get(key)
 
     def pseudonymize(self, key_file, identifiers):
-        """get a pseudonym for each identifier. If identifier is known in PIMS, return this. Otherwise,
-        have PIMS generate a new pseudonym and return that.
+        """Get a pseudonym for each identifier. If identifier is known in PIMS,
+        return this. Otherwise, have PIMS generate a new pseudonym and return that.
 
         Parameters
         ----------
@@ -316,9 +317,7 @@ class ValueTypes:
 
 
 class TypedIdentifier(Identifier):
-    """An identifier with a specific value_type.
-
-    """
+    """An identifier with a specific value_type"""
 
     value_type = ValueTypes.NOT_SET
 
@@ -327,9 +326,8 @@ class TypedIdentifier(Identifier):
 
     @property
     def value_type(self):
-        """In swagger layer value_type is saved as 'source'. Expose this here as value_type because it fits the concepts
-        better
-
+        """In swagger layer value_type is saved as 'source'. Expose this here as
+        value_type because it fits the concepts better
         """
         return self.source
 
@@ -350,8 +348,7 @@ class SeriesInstanceUID(TypedIdentifier):
 
 
 class SOPInstanceUID(TypedIdentifier):
-    """ Designates a single slice in a DICOM file
-    """
+    """Designates a single slice in a DICOM file"""
 
     value_type = ValueTypes.SOP_INSTANCE_UID
 
@@ -361,9 +358,7 @@ class SaltIdentifier(TypedIdentifier):
 
 
 class TypedPseudonym(Pseudonym):
-    """A pseudonym with a specific value_type.
-
-    """
+    """A pseudonym with a specific value_type"""
 
     value_type = ValueTypes.NOT_SET
 
@@ -399,9 +394,7 @@ class NoConnectionException(Exception):
 
 
 class TypedKey(Key):
-    """An identity-pseudonym mapping where both have the same value_type
-
-    """
+    """An identity-pseudonym mapping where both have the same value_type"""
 
     def __init__(self, identifier, pseudonym):
         """Create a typed Key
@@ -425,14 +418,17 @@ class TypedKey(Key):
 
 
 class KeyTypeFactory:
-    """For casting swagger objects to typed objects
-
-    """
+    """For casting swagger objects to typed objects"""
 
     identifier_class_map = {
         x.value_type: x
-        for x in [PatientID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID,
-                  SaltIdentifier]
+        for x in [
+            PatientID,
+            StudyInstanceUID,
+            SeriesInstanceUID,
+            SOPInstanceUID,
+            SaltIdentifier,
+        ]
     }
     pseudonym_class_map = {
         x.value_type: x
@@ -441,7 +437,7 @@ class KeyTypeFactory:
             PseudoStudyInstanceUID,
             PseudoSeriesInstanceUID,
             PseudoSOPInstanceUID,
-            PseudoSalt
+            PseudoSalt,
         ]
     }
 
@@ -522,9 +518,7 @@ class KeyTypeFactory:
 
 
 class PseudonymTemplate:
-    """The way new pseudonyms are generated in PIMS for a single pseudonym type
-
-    """
+    """The way new pseudonyms are generated in PIMS for a single pseudonym type"""
 
     def __init__(self, template_string, pseudonym_class):
         """Create a new pseudonym template
@@ -538,10 +532,12 @@ class PseudonymTemplate:
 
         Notes
         -----
-        In this client library a 'PseudonymTemplate' is the template used for generating values for a single datatype
-        In a PIMS KeyFile, 'pseudonym template' refers to a long string representing templates for ALL datatypes,
-        separated by a separator. The PIMS naming is outdated as it was not designed with multiple datatypes in mind
-        therefore the client library will not follow this naming
+        In this client library a 'PseudonymTemplate' is the template used for
+        generating values for a single datatype In a PIMS KeyFile,
+        'pseudonym template' refers to a long string representing templates for
+        ALL datatypes, separated by a separator. The PIMS naming is outdated as
+        it was not designed with multiple datatypes in mind therefore the client
+        library will not follow this naming
 
         """
         self.template_string = template_string

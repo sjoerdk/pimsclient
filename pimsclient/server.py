@@ -1,5 +1,4 @@
-"""Interaction with a webserver running the PIMS web API
-"""
+"""Interaction with a webserver running the PIMS web API"""
 import json
 from os import environ
 
@@ -10,9 +9,7 @@ from pimsclient.exceptions import PIMSException
 
 
 class PIMSSession:
-    """A logged in session with a PIMSServer
-
-    """
+    """A logged in session with a PIMSServer"""
 
     def __init__(self, session, base_url):
         self.session = session
@@ -63,7 +60,9 @@ class PIMSSession:
             json-decoded contents of response to post
 
         """
-        response = self.check_response(self.session.post(url, params=params, json=json_payload))
+        response = self.check_response(
+            self.session.post(url, params=params, json=json_payload)
+        )
         return json.loads(response.content)
 
     def close(self):
@@ -114,22 +113,16 @@ class PIMSSession:
         elif response.status_code == 404:
             raise ResourceNotFound(response.text)
         else:
-            msg = f"Server returned status_code '{response.status_code}': {response.text}"
+            msg = (
+                f"Server returned status_code '{response.status_code}': {response.text}"
+            )
             raise PIMSServerException(msg)
 
 
 class PIMSServer:
-    """A PIMS server at a certain url
-    """
+    """A PIMS server at a certain url"""
 
-    def __init__(self, url):
-        """
-
-        Parameters
-        ----------
-        url: str
-            URL to PIMS web API
-        """
+    def __init__(self, url: str):
         self.url = url
 
     def get_session(self, user=None, password=None):
@@ -158,7 +151,9 @@ class PIMSServer:
         if not password:
             password = environ.get("PIMS_CLIENT_PASSWORD")
         if user is None or password is None:
-            raise PIMSServerException("Username and password not found. These are required")
+            raise PIMSServerException(
+                "Username and password not found. These are required"
+            )
         session = requests.Session()
         session.auth = HttpNtlmAuth(f"umcn\\{user}", password)
         return PIMSSession(session=session, base_url=self.url)

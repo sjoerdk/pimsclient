@@ -1,3 +1,4 @@
+from typing import Tuple
 from unittest.mock import Mock
 
 import factory
@@ -5,7 +6,13 @@ from factory import fuzzy
 
 from requests.models import Response
 
-from pimsclient.client import ValueTypes, TypedKey, TypedPseudonym, PatientID, PseudoPatientID
+from pimsclient.client import (
+    ValueTypes,
+    TypedKey,
+    TypedPseudonym,
+    PatientID,
+    PseudoPatientID,
+)
 from pimsclient.swagger import User, KeyFile, Identifier, Pseudonym, Key
 
 
@@ -47,8 +54,8 @@ class IdentifierFactory(factory.Factory):
 
 
 class TypedIdentifierFactory(factory.Factory):
-    """ An identifier that can be interpreted as having a valid value type
-    """
+    """An identifier that can be interpreted as having a valid value type"""
+
     class Meta:
         model = Identifier
 
@@ -57,8 +64,8 @@ class TypedIdentifierFactory(factory.Factory):
 
 
 class PatientIDFactory(factory.Factory):
-    """ An identifier that can be interpreted as being a PatientID
-    """
+    """An identifier that can be interpreted as being a PatientID"""
+
     class Meta:
         model = PatientID
 
@@ -66,8 +73,8 @@ class PatientIDFactory(factory.Factory):
 
 
 class TypedPseudonymFactory(factory.Factory):
-    """ A Pseudonym that can be interpreted as having a valid value type
-    """
+    """A Pseudonym that can be interpreted as having a valid value type"""
+
     class Meta:
         model = TypedPseudonym
 
@@ -76,8 +83,8 @@ class TypedPseudonymFactory(factory.Factory):
 
 
 class PseudoPatientIDFactory(factory.Factory):
-    """ A Pseudonym for a PatientID
-    """
+    """A Pseudonym for a PatientID"""
+
     class Meta:
         model = PseudoPatientID
 
@@ -101,26 +108,22 @@ class TypedKeyFactory(factory.Factory):
 
 
 class RequestsMock:
-    """ Can be put in place of the requests module. Does not hit any server but returns kind of realistic arbitrary
-    responses
-
+    """Can be put in place of the requests module. Does not hit any server but
+    returns kind of realistic arbitrary responses
     """
 
     def __init__(self):
         self.requests_mock = Mock()  # for keeping track of past requests_mock
 
-    def set_response_tuple(self, tuple):
-        """Any call to get() or post() will yield a Response() object with the given parameters
-
-        Parameters
-        ----------
-        tuple: Tuple(status_code, text)
-
+    def set_response_tuple(self, tuple: Tuple[int, str]):
+        """Any call to get() or post() will yield a Response() object with the
+        given parameters
         """
         self.set_response(text=tuple[1], status_code=tuple[0])
 
     def set_response(self, text, status_code=200):
-        """Any call to get() or post() will yield a Response() object with the given parameters
+        """Any call to get() or post() will yield a Response() object with the
+        given parameters
 
         Parameters
         ----------
@@ -139,8 +142,8 @@ class RequestsMock:
         self.requests_mock.post.return_value = response
 
     def set_response_exception(self, exception):
-        """Any call to get() or post() will yield the given exception
-        """
+        """Any call to get() or post() will yield the given exception"""
+
         self.requests_mock.get.side_effect = exception
         self.requests_mock.post.side_effect = exception
 
@@ -158,14 +161,12 @@ class RequestsMock:
         return self.requests_mock.get.called or self.requests_mock.post.called
 
     @staticmethod
-    def Session():
+    def session():
         return Mock()
 
 
 class RequestsMockResponseExamples:
-    """Some examples of http response texts that a PIMS Swagger API can return
-
-    """
+    """Some examples of http response texts that a PIMS Swagger API can return"""
 
     INVALID_API_REQUEST = (400, r': "Bad request!"')
 
@@ -228,7 +229,7 @@ class RequestsMockResponseExamples:
         r'{"Count":1,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"umcn\\SVC01234","Email":null,'
         '"DisplayName":null,"Department":null,"BaseRole":"NONE","UserKey":26,"Memberships":[{"Keyfile":26,'
         '"KeyfileName":"z428172_API_test","Role":"ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS",'
-        '"NiceRole":"nonhuman standard with reidentification rights","Deleted":false}],"More":true,"Deleted":false}]}'
+        '"NiceRole":"nonhuman standard with reidentification rights","Deleted":false}],"More":true,"Deleted":false}]}',
     )
 
     GET_USERS_FOR_KEYFILE_RESPONSE = (  # response after successful GET to Keyfiles/{KeyfileKey}/Users
@@ -248,11 +249,11 @@ class RequestsMockResponseExamples:
     DEIDENTIFY_CREATE_JSONOUTPUT_TRUE = (  # response after posting 2 ids to  /Keyfiles/{KeyfileKey}}/Files/Deidentify'
         200,
         r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
-        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6"]]}'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6"]]}',
     )
 
     DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID = (  # same as above, but returns multiple pseudonyms per identity.
         200,
         r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
-        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}',
     )

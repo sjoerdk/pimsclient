@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from pimsclient.client import TypedPseudonym, PseudoPatientID, ValueTypes
+from pimsclient.client import PseudoPatientID
 from pimsclient.swagger import KeyFile, User, KeyFiles, Users, Identifier
 from tests.factories import (
     UserFactory,
@@ -8,7 +6,9 @@ from tests.factories import (
     RequestsMockResponseExamples,
     PseudonymFactory,
     IdentifierFactory,
-    TypedPseudonymFactory, TypedIdentifierFactory, PatientIDFactory, PseudoPatientIDFactory)
+    PatientIDFactory,
+    PseudoPatientIDFactory,
+)
 
 
 def test_swagger_user():
@@ -33,8 +33,8 @@ def test_swagger_keyfile():
 
 
 def test_keyfiles_entrypoint(mock_pims_session):
-    """Get some object from entrypoint, server is mocked and returning mocked responses
-
+    """Get some object from entrypoint, server is mocked and returning mocked
+    responses
     """
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.KEYFILES_FORUSER_RESPONSE
@@ -43,7 +43,6 @@ def test_keyfiles_entrypoint(mock_pims_session):
 
     keyfiles = entrypoint.get_all(user=UserFactory())
     assert len(keyfiles) == 1
-    keyfiles[0].name == "string"
 
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.KEYFILES_RESPONSE
@@ -66,16 +65,18 @@ def test_keyfiles_pseudonymize(mock_pims_session):
         ],
     )
     assert len(keys) == 2
-    keys[0].identifier.value == 'Jack de Boer'
+    keys[0].identifier.value == "Jack de Boer"
 
 
 def test_keyfiles_pseudonymize_different_sources(mock_pims_session):
-    """Get a pseudonym, mock server response. Two different sources should yield separate calls for each source"""
+    """Get a pseudonym, mock server response. Two different sources should yield
+    separate calls for each source
+    """
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     entrypoint = KeyFiles(mock_pims_session)
-    keys = entrypoint.pseudonymize(
+    entrypoint.pseudonymize(
         key_file=KeyFileFactory(),
         identifiers=[
             Identifier(value="Jack de Boer", source="Test"),
@@ -86,8 +87,10 @@ def test_keyfiles_pseudonymize_different_sources(mock_pims_session):
 
 
 def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
-    """In live testing the PIMS server was found not to be able to handle API requests with more then 1000 items
-    Check the chunking system to work around this"""
+    """In live testing the PIMS server was found not to be able to handle API
+    requests with more then 1000 items Check the chunking system to work around
+    this
+    """
 
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
@@ -97,7 +100,9 @@ def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
         key_file=KeyFileFactory(),
         identifiers=[PatientIDFactory() for _ in range(2000)],
     )
-    values_posted = mock_pims_session.session.requests_mock.post.mock_calls[0][2]['json'][0]['values']
+    values_posted = mock_pims_session.session.requests_mock.post.mock_calls[0][2][
+        "json"
+    ][0]["values"]
     assert len(values_posted) <= 1001
 
 
@@ -108,9 +113,8 @@ def test_keyfiles_reidentify(mock_pims_session):
     entrypoint = KeyFiles(mock_pims_session)
 
     keys = entrypoint.reidentify(
-        key_file=KeyFileFactory(), pseudonyms=[
-            PseudoPatientID(value='test'),
-            PseudoPatientID(value='test2')]
+        key_file=KeyFileFactory(),
+        pseudonyms=[PseudoPatientID(value="test"), PseudoPatientID(value="test2")],
     )
 
     assert len(keys) == 2
@@ -124,9 +128,12 @@ def test_keyfiles_reidentify_chunked(mock_pims_session):
     entrypoint = KeyFiles(mock_pims_session)
 
     _ = entrypoint.reidentify(
-        key_file=KeyFileFactory(), pseudonyms=[PseudoPatientIDFactory() for _ in range(2000)]
+        key_file=KeyFileFactory(),
+        pseudonyms=[PseudoPatientIDFactory() for _ in range(2000)],
     )
-    reidentified_items = mock_pims_session.session.requests_mock.post.mock_calls[0][2]['params']['items']
+    reidentified_items = mock_pims_session.session.requests_mock.post.mock_calls[0][2][
+        "params"
+    ]["items"]
     assert len(reidentified_items) <= 501
 
 
@@ -150,12 +157,11 @@ def test_users_get_by_id(mock_pims_session):
 
     user = entrypoint.get(key=1)
 
-    assert user.name == 'umcn\\SVC01234'
+    assert user.name == "umcn\\SVC01234"
 
 
 def test_string_reprs():
-    """Getting coverage up a bit
-    """
+    """Getting coverage up a bit"""
     all_strings = (
         f"{UserFactory()}{KeyFileFactory()}{PseudonymFactory()}{IdentifierFactory()}"
     )
