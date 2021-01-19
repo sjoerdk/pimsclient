@@ -131,9 +131,11 @@ class PIMSServer:
         Parameters
         ----------
         user: str, optional
-            username to connect to PIMS API use, defaults to reading environment key ['PIMS_CLIENT_USER']
+            username to connect to PIMS API use, defaults to reading
+            environment key ['PIMS_CLIENT_USER']
         password: str, optional
-            password to connect to PIMS API, defaults to reading environment key ['PIMS_CLIENT_PASSWORD']
+            password to connect to PIMS API, defaults to reading
+            environment key ['PIMS_CLIENT_PASSWORD']
 
         Raises
         ------

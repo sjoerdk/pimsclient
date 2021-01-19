@@ -1,5 +1,10 @@
 """Connect to a PIMS server, anonymize some identifyers, then re-identify the
 pseudonyms you get back
+
+To run this example, make sure you have a PIMS keyfile and have set the
+environment variables
+PIMS_CLIENT_USER
+PIMS_CLIENT_PASSWORD
 """
 from pimsclient.server import PIMSServer
 from pimsclient.swagger import KeyFiles, Identifier

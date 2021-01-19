@@ -1,4 +1,10 @@
-"""Pseudonymize and re-identify using the hopefully more understandable"""
+"""Pseudonymize and re-identify using the hopefully more understandable
+
+To run this example, make sure you have a PIMS keyfile and have set the
+environment variables
+PIMS_CLIENT_USER
+PIMS_CLIENT_PASSWORD
+"""
 
 from pimsclient.client import connect, PatientID, PseudoPatientID
 

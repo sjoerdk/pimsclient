@@ -1,4 +1,10 @@
-"""Just some basic interactions with a PIMS server"""
+"""Just some basic interactions with a PIMS server
+
+To run this example, make sure you have a PIMS keyfile and have set the
+environment variables
+PIMS_CLIENT_USER
+PIMS_CLIENT_PASSWORD
+"""
 from pimsclient.server import PIMSServer
 from pimsclient.swagger import KeyFiles, Users
 

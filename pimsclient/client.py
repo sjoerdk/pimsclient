@@ -38,8 +38,9 @@ def connect(pims_url, pims_key_file_id, user=None, password=None):
 
 
 class Project:
-    """Main object for PIMS client. A project holds all pseudonymization information for one or more value_type(s) of
-    identifiers. It stores all its data in a single PIMS keyfile.
+    """Main object for PIMS client. A project holds all pseudonymization
+    information for one or more value_type(s) of identifiers. It stores all its
+    data in a single PIMS keyfile.
 
     """
 
@@ -60,7 +61,8 @@ class Project:
 
     def __str__(self):
         return (
-            f"Project for keyfile {self.key_file_id} over connection {self.connection}"
+            f"Project for keyfile {self.key_file_id} over connection "
+            f"{self.connection}"
         )
 
     @property
@@ -165,7 +167,8 @@ class Project:
         Returns
         -------
         List[TypedKey]
-            Pseudonym mapped to identifier if found. If a pseudonym is not found in PIMS it is omitted from list
+            Pseudonym mapped to identifier if found. If a pseudonym is not
+            found in PIMS it is omitted from list
 
         """
         keys = self.connection.reidentify(
@@ -174,30 +177,36 @@ class Project:
         return [self.factory.create_typed_key(x) for x in keys]
 
     def assert_pseudonym_templates(self, should_have_a_template, should_exist):
-        """Make sure the the pseudonym templates for the datatypes in this project are as expected.
+        """Make sure the the pseudonym templates for the datatypes in this project
+         are as expected.
 
-        This check makes sure the format UID's makes sense. For example, if no template is defined for StudyInstanceUID,
-        de-identifying might yield a guid, which is not a valid DICOM UID. Fail early in this case, because this will
+        This check makes sure the format UID's makes sense. For example, if no
+        template is defined for StudyInstanceUID, de-identifying might yield a guid,
+        which is not a valid DICOM UID. Fail early in this case, because this will
         cause headaches later if not fixed.
 
         Notes
         -----
-        In this client library a 'PseudonymTemplate' is for a single datatype. In PIMS, the pseudonym template contains
-        templates for all datatypes. See notes for PseudonymTemplate
+        In this client library a 'PseudonymTemplate' is for a single datatype.
+        In PIMS, the pseudonym template contains templates for all datatypes.
+        See notes for PseudonymTemplate
 
 
         Parameters
         ----------
         should_have_a_template: List[TypedPseudonym]
-            These pseudonym types should have a template defined in this project, regardless of what the actual template
+            These pseudonym types should have a template defined in this project,
+            regardless of what the actual template
             is.
         should_exist: List[PseudonymTemplate]
-            These exact templates should be defined in this project. Requires the template to be exactly a certain value
+            These exact templates should be defined in this project. Requires the
+            template to be exactly a certain value
 
         Raises
         ------
         PIMSProjectException
-            When assertion cannot be done. For example when connection to server fails.
+            When assertion cannot be done. For example when connection to server
+            fails
         InvalidPseudonymTemplateException:
             When this project's template is not as expected
 
@@ -206,7 +215,8 @@ class Project:
         for typed_pseudonym in should_have_a_template:
             if f":{typed_pseudonym.value_type}" not in pims_template:
                 msg = (
-                    f'Could not find any template for "{typed_pseudonym}" in project {self} template "{pims_template}".'
+                    f'Could not find any template for "{typed_pseudonym}" in '
+                    f'project {self} template "{pims_template}".'
                     f" This is required"
                 )
                 raise InvalidPseudonymTemplateException(msg)
@@ -214,7 +224,8 @@ class Project:
         for template in should_exist:
             if template.as_pims_string() not in pims_template:
                 msg = (
-                    f'Could not find "{template.as_pims_string()}" in project {self} template "{pims_template}".'
+                    f'Could not find "{template.as_pims_string()}" in project'
+                    f' {self} template "{pims_template}".'
                     f" This is required"
                 )
                 raise InvalidPseudonymTemplateException(msg)
@@ -222,7 +233,8 @@ class Project:
 
 class PIMSConnection:
     def __init__(self, session):
-        """A logged in session to a PIMS server. Main way in client lib of interacting with PIMS
+        """A logged in session to a PIMS server. Main way in client lib of
+        interacting with PIMS
 
         Parameters
         ----------
@@ -283,7 +295,8 @@ class PIMSConnection:
 
         Notes
         -----
-        Returned list might be shorter than input list. For unknown pseudonyms no keys are returned
+        Returned list might be shorter than input list. For unknown pseudonyms
+        no keys are returned
 
         Returns
         -------
@@ -297,10 +310,12 @@ class PIMSConnection:
 class ValueTypes:
     """Types of identifiers or pseudonyms in PIMS.
 
-    Needed as a patientID should be treated differently then a SeriesInstanceUID. Different patterns for generating for
+    Needed as a patientID should be treated differently then a SeriesInstanceUID.
+    Different patterns for generating for
     example.
 
-    Whenever a DICOM tag is pseudonymized, the DICOM tag name is used as value_type descriptor.
+    Whenever a DICOM tag is pseudonymized, the DICOM tag name is used as value_type
+    descriptor.
 
     See for example name
     https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/DICOM.html
@@ -310,10 +325,18 @@ class ValueTypes:
     STUDY_INSTANCE_UID = "StudyInstanceUID"
     SERIES_INSTANCE_UID = "SeriesInstanceUID"
     SOP_INSTANCE_UID = "SOPInstanceUID"
+    ACCESSION_NUMBER = "AccessionNumber"
     SALT = "Salt"
     NOT_SET = "NOT_SET"
 
-    all = [PATIENT_ID, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID, SALT]
+    all = [
+        PATIENT_ID,
+        STUDY_INSTANCE_UID,
+        SERIES_INSTANCE_UID,
+        SOP_INSTANCE_UID,
+        ACCESSION_NUMBER,
+        SALT,
+    ]
 
 
 class TypedIdentifier(Identifier):
@@ -353,6 +376,10 @@ class SOPInstanceUID(TypedIdentifier):
     value_type = ValueTypes.SOP_INSTANCE_UID
 
 
+class AccessionNumber(TypedIdentifier):
+    value_type = ValueTypes.ACCESSION_NUMBER
+
+
 class SaltIdentifier(TypedIdentifier):
     value_type = ValueTypes.SALT
 
@@ -383,6 +410,10 @@ class PseudoSeriesInstanceUID(TypedPseudonym):
 
 class PseudoSOPInstanceUID(TypedPseudonym):
     value_type = ValueTypes.SOP_INSTANCE_UID
+
+
+class PseudoAccessionNumber(TypedPseudonym):
+    value_type = ValueTypes.ACCESSION_NUMBER
 
 
 class PseudoSalt(TypedPseudonym):
@@ -427,6 +458,7 @@ class KeyTypeFactory:
             StudyInstanceUID,
             SeriesInstanceUID,
             SOPInstanceUID,
+            AccessionNumber,
             SaltIdentifier,
         ]
     }
@@ -437,11 +469,12 @@ class KeyTypeFactory:
             PseudoStudyInstanceUID,
             PseudoSeriesInstanceUID,
             PseudoSOPInstanceUID,
+            PseudoAccessionNumber,
             PseudoSalt,
         ]
     }
 
-    def create_typed_key(self, key):
+    def create_typed_key(self, key: Key) -> TypedKey:
         """Take given swagger.Key and cast to typed key
 
         Parameters
@@ -465,7 +498,7 @@ class KeyTypeFactory:
 
         return TypedKey(identifier=identifier, pseudonym=pseudonym)
 
-    def create_typed_identifier(self, identifier):
+    def create_typed_identifier(self, identifier: Identifier) -> TypedKey:
         """Cast identifier to typed version
 
         Parameters
@@ -516,7 +549,10 @@ class KeyTypeFactory:
             identifier_class = self.pseudonym_class_map[value_type]
             return identifier_class(pseudonym.value)
         except KeyError:
-            msg = f"Unknown value type {pseudonym.source}. Known types: {list(self.pseudonym_class_map.keys())}"
+            msg = (
+                f"Unknown value type {pseudonym.source}. Known types: "
+                f"{list(self.pseudonym_class_map.keys())}"
+            )
             raise TypedKeyFactoryException(msg)
 
 
