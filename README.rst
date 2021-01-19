@@ -40,7 +40,7 @@ Features
 --------
 
 * Pseudonymize and reidentify using PIMS keyfile management as backend
-* Supports multiple value types: PatientUID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID
+* Supports multiple value types: PatientUID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, AccessionNumber
 * Authentication via NTLM
 
 Getting started
