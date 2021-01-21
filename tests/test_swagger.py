@@ -65,7 +65,7 @@ def test_keyfiles_pseudonymize(mock_pims_session):
         ],
     )
     assert len(keys) == 2
-    keys[0].identifier.value == "Jack de Boer"
+    assert keys[0].identifier.value == "Jack de Boer"
 
 
 def test_keyfiles_pseudonymize_different_sources(mock_pims_session):

@@ -224,6 +224,28 @@ class RequestsMockResponseExamples:
         '"PatientID"]}]}',
     )
 
+    # response after re-identify for unknown pseudonyms (empty response)
+    KEYFILES_PSEUDONYMS_REIDENTIFY_NON_EXISTENT_RESPONSE = (
+        200,
+        '{"Count": 0, "Page": 1, "PageSize": 500, "PageCount": 1, "Data": ['
+        '{"Name": "Pseudonyms", "Type": null, "Keys": [], "Action": 4,'
+        '"Values": []},'
+        '{"Name": "Identity", "Type": ["text"], "Keys": [], "Action": 4,'
+        '"Values": []},'
+        '{"Name": "Identity Source", "Type": ["text"], "Keys": [], "Action": 4,'
+        '"Values": []}]}',
+    )
+
+    # response after re-identify where one pseudonym is known
+    KEYFILES_PSEUDONYMS_REIDENTIFY_EXISTENT_RESPONSE = (
+        200,
+        '{"Count":1,"Page":1,"PageSize":500,"PageCount":1,"Data":[{'
+        '"Name":"Pseudonyms","Type":null,"Keys":[3499406],"Action":4,"Values":['
+        '"pseudo2"]},{"Name":"Identity","Type":["Identity"],"Keys":[3499406],'
+        '"Action":4,"Values":["value2"]},{"Name":"Identity Source","Type":['
+        '"IdentitySource"],"Keys":[3499406],"Action":4,"Values":["PatientID"]}]}',
+    )
+
     GET_USER_BY_ID_RESPONSE = (  # Call to 'api/Users/{KeyFileKey}/Details'
         200,
         r'{"Count":1,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"umcn\\SVC01234","Email":null,'
@@ -256,4 +278,14 @@ class RequestsMockResponseExamples:
         200,
         r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
         r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}',
+    )
+
+    DEIDENTIFY_FAILED_TO_INSERT = (  # Trying to re-insert an existing pseudonym
+        500,
+        '{"Message":"Row #3: Failed to insert pseudonyms because one of the '
+        "pseudonyms already exists in the target keyfile with a different "
+        "identifier (or the identifier is already associated with another "
+        "pseudonym). Culprit(s) are one or more of the following pseudonyms: "
+        "pseudo1, pseudo2. \r\nProcess aborted. See Action #1159690 for any "
+        'completed progress (already processed 0 rows).\r\n"}',
     )

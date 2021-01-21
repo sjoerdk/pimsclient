@@ -4,9 +4,11 @@ This module adds one level above the Swagger level, abstracting away details and
 making it easy to work with multiple types of pseudonym under a single project
 description
 """
+from typing import List
+
 from pimsclient.exceptions import PIMSException
 from pimsclient.server import PIMSServer, PIMSServerException
-from pimsclient.swagger import Identifier, Pseudonym, KeyFiles, Users, Key
+from pimsclient.swagger import Identifier, KeyFile, Pseudonym, KeyFiles, Users, Key
 
 
 def connect(pims_url, pims_key_file_id, user=None, password=None):
@@ -74,7 +76,7 @@ class Project:
                 "This project is not connected to any PIMS server"
             )
 
-    def get_key_file(self):
+    def get_key_file(self) -> KeyFile:
         """Caches keyfile got from PIMS locally
 
         Raises
@@ -94,26 +96,22 @@ class Project:
                 raise PIMSProjectException(f"Error getting key file from server: {e}")
         return self._key_file
 
-    def get_name(self):
+    def get_name(self) -> str:
         """
-
         Raises
         ------
         PIMSProjectException
             If name cannot be got for any reason
 
-
         Returns
         -------
         str:
             Name of the project in pims
-
         """
         return self.get_key_file().name
 
-    def get_pims_pseudonym_template(self):
+    def get_pims_pseudonym_template(self) -> str:
         """
-
         Raises
         ------
         PIMSProjectException
@@ -152,7 +150,7 @@ class Project:
 
         return [self.factory.create_typed_key(x) for x in keys]
 
-    def reidentify(self, pseudonyms):
+    def reidentify(self, pseudonyms: List["TypedPseudonym"]) -> List["TypedKey"]:
         """Get identifiers for each pseudonym in list
 
         Parameters
@@ -175,6 +173,17 @@ class Project:
             key_file=self.get_key_file(), pseudonyms=pseudonyms
         )
         return [self.factory.create_typed_key(x) for x in keys]
+
+    def set_keys(self, keys: List[Key]):
+        """Manually set the given pseudonym-identifier keys
+
+        Raises
+        ------
+        PIMSProjectException
+            If any pseudonyms or identifiers are already in keyfile
+        """
+
+        self.connection.set_keys(key_file=self.get_key_file(), keys=keys)
 
     def assert_pseudonym_templates(self, should_have_a_template, should_exist):
         """Make sure the the pseudonym templates for the datatypes in this project
@@ -265,7 +274,9 @@ class PIMSConnection:
         """
         return self.key_files.get(key)
 
-    def pseudonymize(self, key_file, identifiers):
+    def pseudonymize(
+        self, key_file: KeyFile, identifiers: List[Identifier]
+    ) -> List[Key]:
         """Get a pseudonym for each identifier. If identifier is known in PIMS,
         return this. Otherwise, have PIMS generate a new pseudonym and return that.
 
@@ -283,7 +294,7 @@ class PIMSConnection:
         """
         return self.key_files.pseudonymize(key_file=key_file, identifiers=identifiers)
 
-    def reidentify(self, key_file, pseudonyms):
+    def reidentify(self, key_file: KeyFile, pseudonyms: List[Pseudonym]) -> List[Key]:
         """Find the identifiers linked to the given pseudonyms.
 
         Parameters
@@ -291,7 +302,7 @@ class PIMSConnection:
         key_file: KeyFile
             The key_file to use
         pseudonyms: List[Pseudonym]
-            The pseudonyms to get identifyers for
+            The pseudonyms to get identifiers for
 
         Notes
         -----
@@ -305,6 +316,30 @@ class PIMSConnection:
 
         """
         return self.key_files.reidentify(key_file=key_file, pseudonyms=pseudonyms)
+
+    def set_keys(self, key_file: KeyFile, keys: List[Key]):
+        """Manually set the given pseudonym-identifier keys
+
+        Raises
+        ------
+        PIMSServerException
+            If any pseudonym or identifier already exists in keyfile
+
+        """
+        # PIMS silently skips setting a pseudonym if the identity exists already.
+        # We want to avoid silent skiping, so manually check existing
+        reidentified = self.reidentify(
+            key_file=key_file, pseudonyms=[x.pseudonym for x in keys]
+        )
+        if reidentified:
+            raise PIMSServerException(
+                f"One or more identifiers already exist in keyfile: "
+                f"{[x.describe() for x in reidentified]}. Overwriting would make "
+                f"this keyfile inconsistent"
+            )
+
+        # No identities exist. Start setting
+        return self.key_files.set_keys(key_file=key_file, keys=keys)
 
 
 class ValueTypes:
@@ -435,7 +470,7 @@ class TypedKey(Key):
         identifier: TypedIdentifier
             Real identifier, like 'Yen Hu'
         pseudonym: TypedPseudonym
-            Pseudonym used for the identifyer, like 'Case3'
+            Pseudonym used for the identifier, like 'Case3'
         """
         super().__init__(identifier, pseudonym)
 

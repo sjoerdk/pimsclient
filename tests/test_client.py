@@ -1,3 +1,4 @@
+from typing import List
 from unittest.mock import Mock
 
 import pytest
@@ -20,6 +21,8 @@ from pimsclient.server import PIMSServerException
 from pimsclient.swagger import Key, PIMSSwaggerException
 from tests.factories import (
     IdentifierFactory,
+    PatientIDFactory,
+    PseudoPatientIDFactory,
     PseudonymFactory,
     TypedKeyFactory,
     RequestsMockResponseExamples,
@@ -30,8 +33,9 @@ from tests.factories import (
 
 @pytest.fixture()
 def mock_project():
-    """A project with a mock connection that does not hit any server
-    Instead calls to pseudonymize and reidentify will return a random list Key objects with valid value_types
+    """A project with a mock connection that does not hit any server. Instead
+    calls to pseudonymize and reidentify will return a random list Key objects
+    with valid value_types
     """
 
     mock_connection = Mock(spec=PIMSConnection)
@@ -40,8 +44,18 @@ def mock_project():
     return Project(key_file_id=1, connection=mock_connection)
 
 
+@pytest.fixture()
+def some_patient_id_keys() -> List[Key]:
+    return [
+        Key(PatientIDFactory(), PseudoPatientIDFactory()),
+        Key(PatientIDFactory(), PseudoPatientIDFactory()),
+    ]
+
+
 def test_project_no_connection():
-    """Creating a project without a connection is possible, but calling server-hitting methods will fail"""
+    """Creating a project without a connection is possible, but calling
+    server-hitting methods will fail
+    """
     project = Project(key_file_id=1, connection=None)
     with pytest.raises(NoConnectionException):
         project.reidentify(pseudonyms=[])
@@ -181,7 +195,7 @@ def test_typed_key_factory(value_type):
     assert typed_key.value_type == value_type
 
 
-def test_pimsconnection(mock_pims_session):
+def test_pims_connection(mock_pims_session):
     connection = PIMSConnection(session=mock_pims_session)
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
@@ -229,3 +243,40 @@ def test_deidentify(mock_pims_session):
 
     with pytest.raises(PIMSSwaggerException):
         connection.pseudonymize(key_file=KeyFileFactory(), identifiers=identifiers)
+
+
+def test_set_keys(mock_pims_session, some_patient_id_keys):
+    """Add an pseudonym-identifier pair"""
+    connection = PIMSConnection(session=mock_pims_session)
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_NON_EXISTENT_RESPONSE
+    )
+    # keys need to be patientID to match mocked response above
+
+    connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
+
+
+def test_set_keys_existing_identity(mock_pims_session, some_patient_id_keys):
+    """I want to add an pseudonym-identifier pair, but the identifier already
+    exists
+    """
+    connection = PIMSConnection(session=mock_pims_session)
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_EXISTENT_RESPONSE
+    )
+    # keys need to be patientID to match mocked response above
+    with pytest.raises(PIMSServerException):
+        connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
+
+
+def test_set_keys_existing_pseudonym(mock_pims_session, some_patient_id_keys):
+    """Setting a pseudonym that is already used for a different identifier should
+    fail
+    """
+    connection = PIMSConnection(session=mock_pims_session)
+    mock_pims_session.session.set_response_tuple(
+        RequestsMockResponseExamples.DEIDENTIFY_FAILED_TO_INSERT
+    )
+    # keys need to be patientID to match mocked response above
+    with pytest.raises(PIMSServerException):
+        connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
