@@ -310,7 +310,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         per_source = defaultdict(list)
         for x in keys:
-            per_source[x.source].append(x)
+            per_source[x.source()].append(x)
         for source, items in per_source.items():
 
             while items:
@@ -321,12 +321,12 @@ class KeyFiles(SwaggerEntryPoint):
                     {
                         "Name": "Column 1",
                         "Action": "UseAsPseudonym",
-                        "keys": [x.pseudonym.value for x in keys_chunk] + [""],
+                        "Values": [x.pseudonym.value for x in keys_chunk] + [""],
                     },
                     {
                         "Name": "Column 2",
                         "Action": "Pseudonymize",
-                        "keys": [x.identifier.value for x in keys_chunk] + [""],
+                        "Values": [x.identifier.value for x in keys_chunk] + [""],
                     },
                 ]  # add empty items because of bug in PIMS (#8671)
                 params = {
