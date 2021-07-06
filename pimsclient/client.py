@@ -533,7 +533,7 @@ class KeyTypeFactory:
 
         return TypedKey(identifier=identifier, pseudonym=pseudonym)
 
-    def create_typed_identifier(self, identifier: Identifier) -> TypedKey:
+    def create_typed_identifier(self, identifier: Identifier) -> TypedIdentifier:
         """Cast identifier to typed version
 
         Parameters
@@ -560,7 +560,9 @@ class KeyTypeFactory:
             )
             raise TypedKeyFactoryException(msg)
 
-    def create_typed_pseudonym(self, pseudonym, value_type):
+    def create_typed_pseudonym(
+        self, pseudonym: Pseudonym, value_type: str
+    ) -> TypedPseudonym:
         """Cast identifier to typed version
 
         Parameters

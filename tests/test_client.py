@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from pimsclient.client import (
+    AccessionNumber,
     Project,
     KeyTypeFactory,
     TypedKeyFactoryException,
@@ -17,7 +18,7 @@ from pimsclient.client import (
     PseudoSeriesInstanceUID,
     PIMSProjectException,
 )
-from pimsclient.server import PIMSServerException
+from pimsclient.server import PIMSServerException, PIMSSession
 from pimsclient.swagger import Key, PIMSSwaggerException
 from tests.factories import (
     IdentifierFactory,
@@ -280,3 +281,35 @@ def test_set_keys_existing_pseudonym(mock_pims_session, some_patient_id_keys):
     # keys need to be patientID to match mocked response above
     with pytest.raises(PIMSServerException):
         connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
+
+
+@pytest.fixture
+def mock_project_requests(requests_mock):
+    """Mock project that simulates actual requests.post calls. Will
+    raise PIMSServerException for invalid return values, but allows checking what
+    is sent to server
+    """
+    mock_session = Mock()
+    project = Project(
+        key_file_id=1,
+        connection=PIMSConnection(session=PIMSSession(mock_session, base_url="/test")),
+    )
+    project.get_key_file = lambda: KeyFileFactory()  # make sure this passes
+    return project
+
+
+@pytest.mark.parametrize("number", [9620852139762509, "9620852139762509"])
+def test_serialization(mock_project_requests, number):
+    """Make sure serialization does mangle any values with scientific notation
+    There is an issue with accession numbers coming back as '10340^14' instead
+    of the full number
+    """
+
+    try:
+        mock_project_requests.pseudonymize([AccessionNumber(number)])
+    except PIMSServerException:
+        # I just care about the json that was sent, not return
+        pass
+
+    call_args = mock_project_requests.connection.session.session.post.call_args
+    assert call_args.kwargs["json"][0]["values"][0] == number
