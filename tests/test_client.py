@@ -308,8 +308,7 @@ def test_serialization(mock_project_requests, number):
     try:
         mock_project_requests.pseudonymize([AccessionNumber(number)])
     except PIMSServerException:
-        # I just care about the json that was sent, not return
         pass
 
     call_args = mock_project_requests.connection.session.session.post.call_args
-    assert call_args.kwargs["json"][0]["values"][0] == number
+    assert call_args[1]["json"][0]["values"][0] == number
