@@ -6,7 +6,7 @@ flake8==3.9.2
 tox==3.23.1
 coverage==5.5
 Sphinx==4.0.2
-twine==3.4.1
+twine==3.8.0
 requests-mock==1.9.3
 requests-ntlm==1.1.0
 pytest==6.2.4
