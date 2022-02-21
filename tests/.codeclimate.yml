@@ -1,0 +1,3 @@
+## Don't check duplication in example files. Duplication is needed there for clarity
+exclude_patterns:
+- "examples/"
