@@ -28,10 +28,9 @@ target-version = ['py38']
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py37, py38, py39
+envlist = py38, py39
 [gh-actions]
 python =
-    3.7: py37
     3.8: py38
     3.9: py39
 [testenv]
