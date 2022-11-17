@@ -55,10 +55,10 @@ class KeyFile(SwaggerObject):
         pseudonym_template: str
             Template for creating new pseudonyms. See PIMS documentation for format
         """
-        self.key = key
-        self.name = name
-        self.description = description
-        self.pseudonym_template = pseudonym_template
+        self.key: str = key
+        self.name: str = name
+        self.description: str = description
+        self.pseudonym_template: str = pseudonym_template
 
     def __str__(self):
         return f'KeyFile "{self.name}" (key={self.key})'
@@ -138,7 +138,7 @@ class SwaggerEntryPoint:
 
     """
 
-    url_path = None
+    url_path: str
 
     def __init__(self, session):
         """
@@ -172,7 +172,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             If anything goes wrong getting
 
         Returns
@@ -224,14 +224,16 @@ class KeyFiles(SwaggerEntryPoint):
             The PIMS pseudonym for each identifier
 
         """
-        keys = []
+        keys: List["Key"] = []
         # Each call to process a list of identifiers only allows a single source.
         # Split identifiers by source
         per_source = defaultdict(list)
         for x in identifiers:
             per_source[x.source].append(x)
         for source, items in per_source.items():
-            keys = keys + self.deidentify(key_file, [x.value for x in items], source)
+            keys = keys + self.deidentify(
+                key_file, [x.value for x in items], source
+            )
 
         return keys
 
@@ -261,7 +263,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         url = f"{self.url}/{key_file.key}/Files/Deidentify"
         page_size = 1000  # happens to be the limit for this server
-        keys = []
+        keys: List["Key"] = []
 
         while values:
             values_chunk = values[:page_size]
@@ -288,7 +290,9 @@ class KeyFiles(SwaggerEntryPoint):
             )
 
             keys = keys + [
-                Key.init_from_strings(pseudonym=x, identity=y, identity_source=source)
+                Key.init_from_strings(
+                    pseudonym=x, identity=y, identity_source=source
+                )
                 for x, y in zip(pseudonyms, values_chunk)
             ]
 
@@ -301,7 +305,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             When trying to set a pseudonym that already exists in keyfile
         """
 
@@ -321,12 +325,14 @@ class KeyFiles(SwaggerEntryPoint):
                     {
                         "Name": "Column 1",
                         "Action": "UseAsPseudonym",
-                        "Values": [x.pseudonym.value for x in keys_chunk] + [""],
+                        "Values": [x.pseudonym.value for x in keys_chunk]
+                        + [""],
                     },
                     {
                         "Name": "Column 2",
                         "Action": "Pseudonymize",
-                        "Values": [x.identifier.value for x in keys_chunk] + [""],
+                        "Values": [x.identifier.value for x in keys_chunk]
+                        + [""],
                     },
                 ]  # add empty items because of bug in PIMS (#8671)
                 params = {
@@ -365,7 +371,7 @@ class KeyFiles(SwaggerEntryPoint):
         """
         url = f"{self.url}/{key_file.key}/Pseudonyms/Reidentify"
 
-        keys = []
+        keys: List[Key] = []
         per_source = defaultdict(list)
         for x in pseudonyms:
             per_source[x.source].append(x)
@@ -388,7 +394,9 @@ class KeyFiles(SwaggerEntryPoint):
                 #  Filter only the results that were asked for. This cannot be
                 #  filtered properly in the POST request.
                 keys = keys + [
-                    x for x in self.fields_to_keys(fields) if x.source() == source
+                    x
+                    for x in self.fields_to_keys(fields)
+                    if x.source() == source
                 ]
 
         return keys
@@ -420,8 +428,10 @@ class KeyFiles(SwaggerEntryPoint):
         Parameters
         ----------
         fields: Dict
-            The standard type of response given by the Swagger API when multiple identity-pseuonym pairs are returned.
-            For a good example see tests.factories.RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
+            The standard type of response given by the Swagger API when multiple
+            identity-pseuonym pairs are returned. For a good example see
+            tests.factories.RequestsMockResponseExamples.
+            KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
 
         Returns
         -------
@@ -459,7 +469,7 @@ class KeyFiles(SwaggerEntryPoint):
 
         Raises
         ------
-        DeidentifyResponseParsingException
+        DeidentifyResponseParsingError
             When the response contains more than one pseudonym for any identity.
             This could potentially happen when two identifiers have different
             identifier_source values. This code has not been designed for this.
@@ -474,8 +484,8 @@ class KeyFiles(SwaggerEntryPoint):
         try:
             return [pseudonym for _, pseudonym in response["Data"]]
         except ValueError as e:
-            msg = f"Expected an empty line and a pseudonym. Error: '{e}'.."
-            raise DeidentifyResponseParsingException(msg)
+            msg = "Expected an empty line and a pseudonym"
+            raise DeidentifyResponseParsingError(msg) from e
 
 
 class Users(SwaggerEntryPoint):
@@ -514,7 +524,8 @@ class Identifier:
         value: str
             PatientID, StudyInstance or whatever should be pseudonymized
         source: str
-            Source for this value, like the hospital where the PatientID is used. Used for disambiguation
+            Source for this value, like the hospital where the PatientID is used.
+            Used for disambiguation
         """
         self.value = value
         self.source = source
@@ -581,13 +592,13 @@ class Key:
         return f"Key {self.pseudonym.value}"
 
     def describe(self) -> str:
-        """Describe this Key like like 'orginal -> pseudonym'"""
+        """Describe this Key like 'orginal -> pseudonym'"""
         return f"{self.identifier.value} -> {self.pseudonym.value}"
 
 
-class PIMSSwaggerException(Exception):
+class PIMSSwaggerError(Exception):
     pass
 
 
-class DeidentifyResponseParsingException(PIMSSwaggerException):
+class DeidentifyResponseParsingError(PIMSSwaggerError):
     pass

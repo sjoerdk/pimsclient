@@ -100,9 +100,9 @@ def test_keyfiles_pseudonymize_chunk_size(mock_pims_session):
         key_file=KeyFileFactory(),
         identifiers=[PatientIDFactory() for _ in range(2000)],
     )
-    values_posted = mock_pims_session.session.requests_mock.post.mock_calls[0][2][
-        "json"
-    ][0]["values"]
+    values_posted = mock_pims_session.session.requests_mock.post.mock_calls[0][
+        2
+    ]["json"][0]["values"]
     assert len(values_posted) <= 1001
 
 
@@ -114,7 +114,10 @@ def test_keyfiles_reidentify(mock_pims_session):
 
     keys = entrypoint.reidentify(
         key_file=KeyFileFactory(),
-        pseudonyms=[PseudoPatientID(value="test"), PseudoPatientID(value="test2")],
+        pseudonyms=[
+            PseudoPatientID(value="test"),
+            PseudoPatientID(value="test2"),
+        ],
     )
 
     assert len(keys) == 2
@@ -131,9 +134,11 @@ def test_keyfiles_reidentify_chunked(mock_pims_session):
         key_file=KeyFileFactory(),
         pseudonyms=[PseudoPatientIDFactory() for _ in range(2000)],
     )
-    reidentified_items = mock_pims_session.session.requests_mock.post.mock_calls[0][2][
-        "params"
-    ]["items"]
+    reidentified_items = (
+        mock_pims_session.session.requests_mock.post.mock_calls[0][2][
+            "params"
+        ]["items"]
+    )
     assert len(reidentified_items) <= 501
 
 
@@ -163,6 +168,7 @@ def test_users_get_by_id(mock_pims_session):
 def test_string_reprs():
     """Getting coverage up a bit"""
     all_strings = (
-        f"{UserFactory()}{KeyFileFactory()}{PseudonymFactory()}{IdentifierFactory()}"
+        f"{UserFactory()}{KeyFileFactory()}{PseudonymFactory()}"
+        f"{IdentifierFactory()}"
     )
     assert all_strings != ""  # Or actually, assert nothing crashed

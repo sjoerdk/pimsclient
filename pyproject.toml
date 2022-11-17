@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "pimsclient"
+version = "0.6.0"
+description = "Client for PIMS key_file management swagger web API"
+authors = ["sjoerdk <sjoerd.kerkstra@radboudumc.nl>"]
+license = "MIT"
+repository = "https://github.com/sjoerdk/pimsclient"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.28.1"
+requests_ntlm = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.0"
+factory-boy = "^3.2.1"
+requests-mock = "^1.10.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+target-version = ['py38']
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py37, py38, py39
+[gh-actions]
+python =
+    3.7: py37
+    3.8: py38
+    3.9: py39
+[testenv]
+whitelist_externals = poetry
+commands =
+    poetry install -v
+    poetry run pytest --cov=tests/ --cov=dicomtrolley/
+"""

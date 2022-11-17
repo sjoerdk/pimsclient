@@ -4,11 +4,18 @@ This module adds one level above the Swagger level, abstracting away details and
 making it easy to work with multiple types of pseudonym under a single project
 description
 """
-from typing import List
+from typing import List, Optional
 
-from pimsclient.exceptions import PIMSException
-from pimsclient.server import PIMSServer, PIMSServerException
-from pimsclient.swagger import Identifier, KeyFile, Pseudonym, KeyFiles, Users, Key
+from pimsclient.exceptions import PIMSError
+from pimsclient.server import PIMSServer, PIMSServerError
+from pimsclient.swagger import (
+    Identifier,
+    KeyFile,
+    Pseudonym,
+    KeyFiles,
+    Users,
+    Key,
+)
 
 
 def connect(pims_url, pims_key_file_id, user=None, password=None):
@@ -58,7 +65,7 @@ class Project:
         """
         self.key_file_id = key_file_id
         self._connection = connection
-        self._key_file = None
+        self._key_file: Optional[KeyFile] = None
         self.factory = KeyTypeFactory()
 
     def __str__(self):
@@ -72,7 +79,7 @@ class Project:
         if self._connection:
             return self._connection
         else:
-            raise NoConnectionException(
+            raise NoConnectionError(
                 "This project is not connected to any PIMS server"
             )
 
@@ -89,12 +96,25 @@ class Project:
         KeyFile
             The keyfile that this project stores its data in
         """
-        if not self._key_file:
+        if self._key_file is None:
             try:
-                self._key_file = self.connection.get_key_file(key=self.key_file_id)
-            except PIMSServerException as e:
-                raise PIMSProjectException(f"Error getting key file from server: {e}")
+                self._key_file = self.connection.get_key_file(
+                    key=self.key_file_id
+                )
+            except PIMSServerError as e:
+                raise PIMSProjectException(
+                    "Error getting key file from server"
+                ) from e
         return self._key_file
+
+    def update_cached_key_file(self):
+        try:
+            self._key_file = self.connection.get_key_file(key=self.key_file_id)
+            return self._key_file
+        except PIMSServerError as e:
+            raise PIMSProjectException(
+                "Error getting key file from server"
+            ) from e
 
     def get_name(self) -> str:
         """
@@ -150,7 +170,9 @@ class Project:
 
         return [self.factory.create_typed_key(x) for x in keys]
 
-    def reidentify(self, pseudonyms: List["TypedPseudonym"]) -> List["TypedKey"]:
+    def reidentify(
+        self, pseudonyms: List["TypedPseudonym"]
+    ) -> List["TypedKey"]:
         """Get identifiers for each pseudonym in list
 
         Parameters
@@ -265,7 +287,7 @@ class PIMSConnection:
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             When key file cannot be got for some reason
 
         Returns
@@ -274,9 +296,7 @@ class PIMSConnection:
         """
         return self.key_files.get(key)
 
-    def pseudonymize(
-        self, key_file: KeyFile, identifiers: List[Identifier]
-    ) -> List[Key]:
+    def pseudonymize(self, key_file: KeyFile, identifiers: List[Identifier]):
         """Get a pseudonym for each identifier. If identifier is known in PIMS,
         return this. Otherwise, have PIMS generate a new pseudonym and return that.
 
@@ -292,9 +312,11 @@ class PIMSConnection:
         List[Key]
             The PIMS pseudonym for each identifier
         """
-        return self.key_files.pseudonymize(key_file=key_file, identifiers=identifiers)
+        return self.key_files.pseudonymize(
+            key_file=key_file, identifiers=identifiers
+        )
 
-    def reidentify(self, key_file: KeyFile, pseudonyms: List[Pseudonym]) -> List[Key]:
+    def reidentify(self, key_file: KeyFile, pseudonyms: List[Pseudonym]):
         """Find the identifiers linked to the given pseudonyms.
 
         Parameters
@@ -315,14 +337,16 @@ class PIMSConnection:
             A list of pseudonym-identifier keys
 
         """
-        return self.key_files.reidentify(key_file=key_file, pseudonyms=pseudonyms)
+        return self.key_files.reidentify(
+            key_file=key_file, pseudonyms=pseudonyms
+        )
 
     def set_keys(self, key_file: KeyFile, keys: List[Key]):
         """Manually set the given pseudonym-identifier keys
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             If any pseudonym or identifier already exists in keyfile
 
         """
@@ -332,7 +356,7 @@ class PIMSConnection:
             key_file=key_file, pseudonyms=[x.pseudonym for x in keys]
         )
         if reidentified:
-            raise PIMSServerException(
+            raise PIMSServerError(
                 f"One or more identifiers already exist in keyfile: "
                 f"{[x.describe() for x in reidentified]}. Overwriting would make "
                 f"this keyfile inconsistent"
@@ -376,8 +400,6 @@ class ValueTypes:
 
 class TypedIdentifier(Identifier):
     """An identifier with a specific value_type"""
-
-    value_type = ValueTypes.NOT_SET
 
     def __init__(self, value):
         super().__init__(value=value, source=self.value_type)
@@ -455,7 +477,7 @@ class PseudoSalt(TypedPseudonym):
     value_type = ValueTypes.SALT
 
 
-class NoConnectionException(Exception):
+class NoConnectionError(Exception):
     pass
 
 
@@ -533,7 +555,9 @@ class KeyTypeFactory:
 
         return TypedKey(identifier=identifier, pseudonym=pseudonym)
 
-    def create_typed_identifier(self, identifier: Identifier) -> TypedIdentifier:
+    def create_typed_identifier(
+        self, identifier: Identifier
+    ) -> TypedIdentifier:
         """Cast identifier to typed version
 
         Parameters
@@ -553,12 +577,12 @@ class KeyTypeFactory:
         try:
             identifier_class = self.identifier_class_map[identifier.source]
             return identifier_class(identifier.value)
-        except KeyError:
+        except KeyError as e:
             msg = (
                 f'Unknown value type "{identifier.source}". Known types: '
                 f"{list(self.identifier_class_map.keys())}"
             )
-            raise TypedKeyFactoryException(msg)
+            raise TypedKeyFactoryException(msg) from e
 
     def create_typed_pseudonym(
         self, pseudonym: Pseudonym, value_type: str
@@ -585,12 +609,12 @@ class KeyTypeFactory:
         try:
             identifier_class = self.pseudonym_class_map[value_type]
             return identifier_class(pseudonym.value)
-        except KeyError:
+        except KeyError as e:
             msg = (
                 f"Unknown value type {pseudonym.source}. Known types: "
                 f"{list(self.pseudonym_class_map.keys())}"
             )
-            raise TypedKeyFactoryException(msg)
+            raise TypedKeyFactoryException(msg) from e
 
 
 class PseudonymTemplate:
@@ -623,17 +647,17 @@ class PseudonymTemplate:
         return f":{self.pseudonym_class.value_type}|{self.template_string}"
 
 
-class PIMSClientException(PIMSException):
+class PIMSClientError(PIMSError):
     pass
 
 
-class PIMSProjectException(PIMSClientException):
+class PIMSProjectException(PIMSClientError):
     pass
 
 
-class TypedKeyFactoryException(PIMSClientException):
+class TypedKeyFactoryException(PIMSClientError):
     pass
 
 
-class InvalidPseudonymTemplateException(PIMSClientException):
+class InvalidPseudonymTemplateException(PIMSClientError):
     pass

@@ -203,25 +203,28 @@ class RequestsMockResponseExamples:
 
     KEYFILES_RESPONSE = (
         200,
-        '{ "CreationDate": "2019-05-29T11:32:09.735Z", "SequenceNumber": 0, "Name": "string", '
-        '"Description": "string", "PseudonymTemplate": "string", "KeyfileKey": 0, "Deleted": true,'
-        '"WorkspaceID": "string" }',
+        '{ "CreationDate": "2019-05-29T11:32:09.735Z", "SequenceNumber": 0, '
+        '"Name": "string", "Description": "string", "PseudonymTemplate": "string", '
+        '"KeyfileKey": 0, "Deleted": true, "WorkspaceID": "string" }',
     )
 
-    KEYFILES_PSEUDONYMS_POST_RESPONSE = (  # response to successful post to Keyfiles/{KeyfileKey}/Pseudonyms
+    # response to successful post to Keyfiles/{KeyfileKey}/Pseudonyms
+    KEYFILES_PSEUDONYMS_POST_RESPONSE = (
         201,
-        '{"PseudonymLnkKey":167033,"KeyfileKey":26,"Pseudonym":"63bf2309-d280-44d0-914b-a74a25dfc56d",'
-        '"Deleted":false,"Identifier":"Henk_Sjansen2","IdentitySource":"sjoerd_zelf"}',
+        '{"PseudonymLnkKey":167033,"KeyfileKey":26,"Pseudonym":'
+        '"63bf2309-d280-44d0-914b-a74a25dfc56d","Deleted":false,"Identifier":'
+        '"Henk_Sjansen2","IdentitySource":"sjoerd_zelf"}',
     )
 
-    KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE = (  # response after successful re-identify of 2 pseudonyms
+    # response after successful re-identify of 2 pseudonyms
+    KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE = (
         200,
-        '{"Count":2,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"Pseudonyms","Type":null,'
-        '"Keys":[166741,166742],"Action":4,"Values":["test",'
-        '"test2"]},{"Name":"Identity","Type":["Identity","Identity"],'
-        '"Keys":[166741,166742],"Action":4,"Values":["sjoerd_kerkstra","secret"]},{"Name":"Identity Source",'
-        '"Type":["IdentitySource","IdentitySource"],"Keys":[166741,166742],"Action":4,"Values":["PatientID",'
-        '"PatientID"]}]}',
+        '{"Count":2,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":'
+        '"Pseudonyms","Type":null,"Keys":[166741,166742],"Action":4,"Values":'
+        '["test","test2"]},{"Name":"Identity","Type":["Identity","Identity"],'
+        '"Keys":[166741,166742],"Action":4,"Values":["sjoerd_kerkstra","secret"]},'
+        '{"Name":"Identity Source", "Type":["IdentitySource","IdentitySource"],'
+        '"Keys":[166741,166742],"Action":4,"Values":["PatientID","PatientID"]}]}',
     )
 
     # response after re-identify for unknown pseudonyms (empty response)
@@ -248,36 +251,48 @@ class RequestsMockResponseExamples:
 
     GET_USER_BY_ID_RESPONSE = (  # Call to 'api/Users/{KeyFileKey}/Details'
         200,
-        r'{"Count":1,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":"umcn\\SVC01234","Email":null,'
-        '"DisplayName":null,"Department":null,"BaseRole":"NONE","UserKey":26,"Memberships":[{"Keyfile":26,'
-        '"KeyfileName":"z428172_API_test","Role":"ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS",'
-        '"NiceRole":"nonhuman standard with reidentification rights","Deleted":false}],"More":true,"Deleted":false}]}',
+        r'{"Count":1,"Page":1,"PageSize":20,"PageCount":1,"Data":[{"Name":'
+        r'"umcn\\SVC01234","Email":null,"DisplayName":null,"Department":null,'
+        r'"BaseRole":"NONE","UserKey":26,"Memberships":[{"Keyfile":26,"KeyfileName":'
+        r'"z428172_API_test","Role":'
+        r'"ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS","NiceRole":'
+        r'"nonhuman standard with reidentification rights","Deleted":false}],'
+        r'"More":true,"Deleted":false}]}',
     )
 
-    GET_USERS_FOR_KEYFILE_RESPONSE = (  # response after successful GET to Keyfiles/{KeyfileKey}/Users
+    # response after successful GET to Keyfiles/{KeyfileKey}/Users
+    GET_USERS_FOR_KEYFILE_RESPONSE = (
         200,
-        r'{ "Count": 2, "Page": 1, "PageSize": 20, "PageCount": 1, "Data": [ { "Name": "umcn\\SVC01234", "Email":'
-        r'"?", "DisplayName": "umcn\\SVC01234", "Department": "?", "BaseRole": "CREATE_KEYFILE", "UserKey": 26,'
+        r'{ "Count": 2, "Page": 1, "PageSize": 20, "PageCount": 1, "Data": [ { '
+        r'"Name": "umcn\\SVC01234", "Email":"?", "DisplayName": "umcn\\SVC01234", '
+        r'"Department": "?", "BaseRole": "CREATE_KEYFILE", "UserKey": 26,'
         ' "Memberships": [ { "Keyfile": 26, "KeyfileName": "API_test", '
         '"Role": "ROLE_NONHUMAN_STANDARD_WITH_REIDENTIFICATION_RIGHTS", '
-        '"NiceRole": "nonhuman standard with reidentification rights", "Deleted": false } ], '
-        r'"More": false, "Deleted": false }, { "Name": "UMCN\\Z123456", "Email": "a.smith@radboudumc.nl", '
-        '"DisplayName": "Smith, Arnold", "Department": "Radiologie en Nucleaire Geneeskunde",'
-        ' "BaseRole": "NONE", "UserKey": 22, "Memberships": [ { "Keyfile": 26, "KeyfileName": "API_test",'
-        ' "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "key_file owner", "Deleted": false } ], "More": false,'
-        ' "Deleted": false } ]}',
+        '"NiceRole": "nonhuman standard with reidentification rights", "Deleted": '
+        r'false } ], "More": false, "Deleted": false }, { "Name": "UMCN\\Z123456",'
+        r' "Email": "a.smith@radboudumc.nl", "DisplayName": "Smith, Arnold", '
+        r'"Department": "Radiologie en Nucleaire Geneeskunde", "BaseRole": "NONE",'
+        r' "UserKey": 22, "Memberships": [ { "Keyfile": 26, "KeyfileName": '
+        r'"API_test", "Role": "ROLE_KEYFILE_OWNER", "NiceRole": "key_file owner", '
+        r'"Deleted": false } ], "More": false, "Deleted": false } ]}',
     )
 
-    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE = (  # response after posting 2 ids to  /Keyfiles/{KeyfileKey}}/Files/Deidentify'
+    # response after posting 2 ids to  /Keyfiles/{KeyfileKey}}/Files/Deidentify'
+    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE = (
         200,
-        r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
-        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6"]]}',
+        r'{"Headers":["Column 1","Pseudonyms '
+        r'(Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],'
+        r'["","40f5e7a3-688e-4654-b432-2d0b8138e8b6"]]}',
     )
 
-    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID = (  # same as above, but returns multiple pseudonyms per identity.
+    # same as above, but returns multiple pseudonyms per identity.
+    DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID = (
         200,
-        r'{"Headers":["Column 1","Pseudonyms (Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
-        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}',
+        r'{"Headers":["Column 1","Pseudonyms '
+        r'(Stored in Keyfile https://pims.radboudumc.nl/Keyfiles/26/Details/26452)"]'
+        r',"Data":[["","2326473b-3a35-448d-8901-b0fb1f983aff"],'
+        r'["","40f5e7a3-688e-4654-b432-2d0b8138e8b6", "extra!"]]}',
     )
 
     DEIDENTIFY_FAILED_TO_INSERT = (  # Trying to re-insert an existing pseudonym

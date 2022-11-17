@@ -8,7 +8,7 @@ from pimsclient.client import (
     Project,
     KeyTypeFactory,
     TypedKeyFactoryException,
-    NoConnectionException,
+    NoConnectionError,
     PIMSConnection,
     TypedPseudonym,
     PseudonymTemplate,
@@ -18,8 +18,8 @@ from pimsclient.client import (
     PseudoSeriesInstanceUID,
     PIMSProjectException,
 )
-from pimsclient.server import PIMSServerException, PIMSSession
-from pimsclient.swagger import Key, PIMSSwaggerException
+from pimsclient.server import PIMSServerError, PIMSSession
+from pimsclient.swagger import Key, PIMSSwaggerError
 from tests.factories import (
     IdentifierFactory,
     PatientIDFactory,
@@ -40,8 +40,12 @@ def mock_project():
     """
 
     mock_connection = Mock(spec=PIMSConnection)
-    mock_connection.pseudonymize.return_value = [TypedKeyFactory() for _ in range(20)]
-    mock_connection.reidentify.return_value = [TypedKeyFactory() for _ in range(20)]
+    mock_connection.pseudonymize.return_value = [
+        TypedKeyFactory() for _ in range(20)
+    ]
+    mock_connection.reidentify.return_value = [
+        TypedKeyFactory() for _ in range(20)
+    ]
     return Project(key_file_id=1, connection=mock_connection)
 
 
@@ -58,15 +62,15 @@ def test_project_no_connection():
     server-hitting methods will fail
     """
     project = Project(key_file_id=1, connection=None)
-    with pytest.raises(NoConnectionException):
+    with pytest.raises(NoConnectionError):
         project.reidentify(pseudonyms=[])
 
-    with pytest.raises(NoConnectionException):
+    with pytest.raises(NoConnectionError):
         project.pseudonymize(identifiers=[])
 
 
 def test_project_get_key_file_fails(mock_project):
-    mock_project.connection.get_key_file.side_effect = PIMSServerException(
+    mock_project.connection.get_key_file.side_effect = PIMSServerError(
         "Terrible server error"
     )
 
@@ -170,7 +174,8 @@ def test_project_assert_pseudonym_templates_realistic(mock_project):
 def test_typed_key_factory_exception():
     """Trying to create a typed key for an unknown type should fail"""
     key = Key(
-        identifier=IdentifierFactory(source="UNKNOWN"), pseudonym=PseudonymFactory()
+        identifier=IdentifierFactory(source="UNKNOWN"),
+        pseudonym=PseudonymFactory(),
     )
 
     with pytest.raises(TypedKeyFactoryException):
@@ -189,7 +194,8 @@ def test_typed_key_factory_exception():
 def test_typed_key_factory(value_type):
     """Creating typed keys for these value types should work"""
     key = Key(
-        identifier=IdentifierFactory(source=value_type), pseudonym=PseudonymFactory()
+        identifier=IdentifierFactory(source=value_type),
+        pseudonym=PseudonymFactory(),
     )
 
     typed_key = KeyTypeFactory().create_typed_key(key)
@@ -208,7 +214,9 @@ def test_pims_connection(mock_pims_session):
     mock_pims_session.session.set_response_tuple(
         RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_RESPONSE
     )
-    connection.reidentify(key_file=KeyFileFactory(), pseudonyms=[PseudonymFactory()])
+    connection.reidentify(
+        key_file=KeyFileFactory(), pseudonyms=[PseudonymFactory()]
+    )
 
 
 def test_str():
@@ -234,7 +242,9 @@ def test_deidentify(mock_pims_session):
         RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE
     )
     identifiers = [IdentifierFactory(), IdentifierFactory()]
-    keys = connection.pseudonymize(key_file=KeyFileFactory(), identifiers=identifiers)
+    keys = connection.pseudonymize(
+        key_file=KeyFileFactory(), identifiers=identifiers
+    )
     assert len(keys) == 2
     assert str(keys[0].identifier) == str(identifiers[0])
 
@@ -242,8 +252,10 @@ def test_deidentify(mock_pims_session):
         RequestsMockResponseExamples.DEIDENTIFY_CREATE_JSONOUTPUT_TRUE_INVALID
     )
 
-    with pytest.raises(PIMSSwaggerException):
-        connection.pseudonymize(key_file=KeyFileFactory(), identifiers=identifiers)
+    with pytest.raises(PIMSSwaggerError):
+        connection.pseudonymize(
+            key_file=KeyFileFactory(), identifiers=identifiers
+        )
 
 
 def test_set_keys(mock_pims_session, some_patient_id_keys):
@@ -266,8 +278,10 @@ def test_set_keys_existing_identity(mock_pims_session, some_patient_id_keys):
         RequestsMockResponseExamples.KEYFILES_PSEUDONYMS_REIDENTIFY_EXISTENT_RESPONSE
     )
     # keys need to be patientID to match mocked response above
-    with pytest.raises(PIMSServerException):
-        connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
+    with pytest.raises(PIMSServerError):
+        connection.set_keys(
+            key_file=KeyFileFactory(), keys=some_patient_id_keys
+        )
 
 
 def test_set_keys_existing_pseudonym(mock_pims_session, some_patient_id_keys):
@@ -279,20 +293,24 @@ def test_set_keys_existing_pseudonym(mock_pims_session, some_patient_id_keys):
         RequestsMockResponseExamples.DEIDENTIFY_FAILED_TO_INSERT
     )
     # keys need to be patientID to match mocked response above
-    with pytest.raises(PIMSServerException):
-        connection.set_keys(key_file=KeyFileFactory(), keys=some_patient_id_keys)
+    with pytest.raises(PIMSServerError):
+        connection.set_keys(
+            key_file=KeyFileFactory(), keys=some_patient_id_keys
+        )
 
 
 @pytest.fixture
 def mock_project_requests(requests_mock):
     """Mock project that simulates actual requests.post calls. Will
-    raise PIMSServerException for invalid return values, but allows checking what
+    raise PIMSServerError for invalid return values, but allows checking what
     is sent to server
     """
     mock_session = Mock()
     project = Project(
         key_file_id=1,
-        connection=PIMSConnection(session=PIMSSession(mock_session, base_url="/test")),
+        connection=PIMSConnection(
+            session=PIMSSession(mock_session, base_url="/test")
+        ),
     )
     project.get_key_file = lambda: KeyFileFactory()  # make sure this passes
     return project
@@ -307,7 +325,7 @@ def test_serialization(mock_project_requests, number):
 
     try:
         mock_project_requests.pseudonymize([AccessionNumber(number)])
-    except PIMSServerException:
+    except PIMSServerError:
         pass
 
     call_args = mock_project_requests.connection.session.session.post.call_args

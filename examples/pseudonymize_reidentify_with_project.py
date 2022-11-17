@@ -14,7 +14,9 @@ print(project.get_pims_pseudonym_template())
 
 # I have some patientID's I want to pseudonymize with PIMS
 print("Pseudonymizing some patientIDs: ")
-keys1 = project.pseudonymize([PatientID("5123"), PatientID("5124"), PatientID("5125")])
+keys1 = project.pseudonymize(
+    [PatientID("5123"), PatientID("5124"), PatientID("5125")]
+)
 print([str(x.identifier) + " - " + str(x) for x in keys1])
 
 # extract the pseudonyms to use as example in next step

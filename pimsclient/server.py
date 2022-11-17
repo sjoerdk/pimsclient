@@ -5,7 +5,7 @@ from os import environ
 import requests
 from requests_ntlm import HttpNtlmAuth
 
-from pimsclient.exceptions import PIMSException
+from pimsclient.exceptions import PIMSError
 
 
 class PIMSSession:
@@ -25,7 +25,7 @@ class PIMSSession:
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             Several types of server exception if get on server does not work
 
         Returns
@@ -51,7 +51,7 @@ class PIMSSession:
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             Several types of server exception if get on server does not work
 
         Returns
@@ -91,11 +91,11 @@ class PIMSSession:
 
         Raises
         ------
-        OperationForbidden(PIMSServerException)
+        OperationForbidden(PIMSServerError)
             If an action is not allowed by PIMS for the logged in user
-        ResourceNotFound(PIMSServerException)
+        ResourceNotFound(PIMSServerError)
             If a 404 is returned
-        OperationNotSupported(PIMSServerException)
+        OperationNotSupported(PIMSServerError)
             If a 405 is found
         """
         if response.status_code == 200:
@@ -114,9 +114,10 @@ class PIMSSession:
             raise ResourceNotFound(response.text)
         else:
             msg = (
-                f"Server returned status_code '{response.status_code}': {response.text}"
+                f"Server returned status_code '{response.status_code}': "
+                f"{response.text}"
             )
-            raise PIMSServerException(msg)
+            raise PIMSServerError(msg)
 
 
 class PIMSServer:
@@ -139,7 +140,7 @@ class PIMSServer:
 
         Raises
         ------
-        PIMSServerException
+        PIMSServerError
             When no username or password is given or found in env
 
         Returns
@@ -153,7 +154,7 @@ class PIMSServer:
         if not password:
             password = environ.get("PIMS_CLIENT_PASSWORD")
         if user is None or password is None:
-            raise PIMSServerException(
+            raise PIMSServerError(
                 "Username and password not found. These are required"
             )
         session = requests.Session()
@@ -161,25 +162,25 @@ class PIMSServer:
         return PIMSSession(session=session, base_url=self.url)
 
 
-class PIMSServerException(PIMSException):
+class PIMSServerError(PIMSError):
     pass
 
 
-class BadRequest(PIMSServerException):
+class BadRequest(PIMSServerError):
     pass
 
 
-class Unauthorized(PIMSServerException):
+class Unauthorized(PIMSServerError):
     pass
 
 
-class OperationForbidden(PIMSServerException):
+class OperationForbidden(PIMSServerError):
     pass
 
 
-class OperationNotSupported(PIMSServerException):
+class OperationNotSupported(PIMSServerError):
     pass
 
 
-class ResourceNotFound(PIMSServerException):
+class ResourceNotFound(PIMSServerError):
     pass
