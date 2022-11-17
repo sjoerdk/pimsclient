@@ -9,9 +9,13 @@
 
 Client for PIMS keyfile management swagger web API.
 
-* Free software: MIT license
 * Pseudonymize and reidentify using PIMS keyfile management as backend
-* Supports multiple value types: PatientUID, StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID, AccessionNumber
+* Supports multiple identity/pseudonym types:
+  * PatientUID
+  * StudyInstanceUID
+  * SeriesInstanceUID
+  * SOPInstanceUID
+  * AccessionNumber
 * Authentication via NTLM
 
 ## Installation
