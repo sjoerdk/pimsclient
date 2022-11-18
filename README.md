@@ -48,13 +48,33 @@ To use pimsclient in a project
 
 ### Credentials
 
-Should be set in the environment using the keys
+Your credentials should not be written into your scripts. Instead, pimsclient reads them from  
+the environment keys `PIMS_CLIENT_USER` and `PIMS_CLIENT_PASSWORD`.
+These can be set in different ways depending on the way you run pimsclient. The most basic way
+is to run a python script from the command line:
 
+#### linux
 ```
-    PIMS_CLIENT_USER
-    PIMS_CLIENT_PASSWORD
+    PIMS_CLIENT_USER=username;PIMS_CLIENT_PASSWORD=pass
+    python yourscript.py
 ```
+to test you can use `echo $PIMS_CLIENT_USER` 
 
+#### windows cmd
+```
+  set PIMS_CLIENT_USER=username
+  set PIMS_CLIENT_PASSWORD=pass
+  python yourscript.py
+```
+to test you can use `echo %PIMS_CLIENT_USER%`
+
+#### windows powershell
+```
+  $env:PIMS_CLIENT_USER = 'username'
+  $env:PIMS_CLIENT_PASSWORD = 'pass'
+  python yourscript.py
+```
+to test you can use `$env:PIMS_CLIENT_USER`
 
 # Contributing
 You can contribute in different ways
