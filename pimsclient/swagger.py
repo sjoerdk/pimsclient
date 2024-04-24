@@ -1,6 +1,7 @@
 """Additional methods to handle swagger API responses that were not or could not be
 auto-generated like swagger_models.py
 """
+import json
 from enum import Enum
 from typing import Dict, Type
 
@@ -104,7 +105,7 @@ class SwaggerPagedResultsIterator:
         response = self.session.request(
             method=self.method, url=self.url, params=params
         )
-        return self.paged_result_class.model_validate_json(response.text)
+        return self.paged_result_class.parse_obj(json.loads(response.text))
 
 
 class MyJsonDataHeader(JsonDataHeader):

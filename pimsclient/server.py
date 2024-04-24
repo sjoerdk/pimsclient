@@ -13,6 +13,7 @@ Server methods:
   dicts anyway, and you can inspect and take what you need from them
 
 """
+import json
 from collections import defaultdict
 from typing import Dict, List, Type, Union
 
@@ -152,7 +153,7 @@ class EntryPath:
             If parsing does not work
         """
         try:
-            return expected_obj_class.model_validate_json(json_string)
+            return expected_obj_class.parse_obj(json.loads(json_string))
         except pydantic.ValidationError as e:
             raise PIMSServerError(
                 f'Could not parse "{json_string[:30]}..." as'
