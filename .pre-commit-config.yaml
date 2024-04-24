@@ -30,7 +30,6 @@ repos:
       - id: mypy
         exclude: "pimsclient/swagger_models_v0.*"
         additional_dependencies:
-          - mypy
-          - pydantic
+          - "pydantic>=1.10.4"
           - types-requests
           - types-Jinja2
