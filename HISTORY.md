@@ -1,4 +1,9 @@
 # History
+## 2.0.0 (2024-04-24)
+* Moves to support PIMS2 API
+* Rewrites all tests, most backend code
+* Adds Microsoft AD authentication
+* Replaces main interaction object `Project` with `KeyFile`
 
 ## 0.7.0 (2022-11-18)
 * Moves to poetry/pyproject.toml for packaging
