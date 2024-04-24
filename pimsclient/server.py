@@ -264,7 +264,9 @@ class Files(EntryPath):
                         values=[x.source for x in identifiers],
                     ),
                 ]
-            )
+            ),
+            targetKeyfileID=None,
+            identitySource=None,
         )
         print(f"sending {request.json()}")
 
@@ -313,7 +315,10 @@ class Identities(EntryPath):
         request = ReidentificationRequest(
             pseudonyms=PseudonymsReidentificationRequest(
                 value=[x.value for x in pseudonyms]
-            )
+            ),
+            columns=None,
+            targetKeyfileID=None,
+            activityID=None,
         )
 
         logger.debug(f"sending {request.json()} to {url}")
