@@ -4,6 +4,7 @@
 * Rewrites all tests, most backend code
 * Adds Microsoft AD authentication
 * Replaces main interaction object `Project` with `KeyFile`
+* Skips major version 1 to align with PIMS version
 
 ## 0.7.0 (2022-11-18)
 * Moves to poetry/pyproject.toml for packaging
