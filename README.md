@@ -27,54 +27,28 @@ pip install pimsclient
 ### Basic example
 To use pimsclient in a project
 
-```
-    from pimsclient.client import connect, PatientID, PseudoPatientID
-
-    # Create a project connected to a certain PIMS key file
-    project = connect('https://pims.radboudumc.nl/api',
-                       pims_key_file_id=26)
+```    
+    # Create a KeyFile instance    
+    keyfile = KeyFile.init_from_id(
+        keyfile_id=49,
+        client=AuthenticatedClient(session=session),
+        server=PIMSServer(url="https://url_to_pims_api")     
 
     # I have some patientIDs I want to pseudonymize with PIMS
-    keys = project.pseudonymize([PatientID('1234'),
+    keys = keyfile.pseudonymize([PatientID('1234'),
                                  PatientID('5678'),
                                  PatientID('9012')])
 
     # I found some pseudo patientIDs. What was the original ID?
-    keys = project.reidentify([PseudoPatientID('Patient1'),
+    keys = keyfile.reidentify([PseudoPatientID('Patient1'),
                                PseudoPatientID('Patient2'),
                                PseudoPatientID('Patient3')])
 
 ```
 
 ### Credentials
-
-Your credentials should not be written into your scripts. Instead, pimsclient reads them from  
-the environment keys `PIMS_CLIENT_USER` and `PIMS_CLIENT_PASSWORD`.
-These can be set in different ways depending on the way you run pimsclient. The most basic way
-is to run a python script from the command line:
-
-#### linux
-```
-    PIMS_CLIENT_USER=username;PIMS_CLIENT_PASSWORD=pass
-    python yourscript.py
-```
-to test you can use `echo $PIMS_CLIENT_USER` 
-
-#### windows cmd
-```
-  set PIMS_CLIENT_USER=username
-  set PIMS_CLIENT_PASSWORD=pass
-  python yourscript.py
-```
-to test you can use `echo %PIMS_CLIENT_USER%`
-
-#### windows powershell
-```
-  $env:PIMS_CLIENT_USER = 'username'
-  $env:PIMS_CLIENT_PASSWORD = 'pass'
-  python yourscript.py
-```
-to test you can use `$env:PIMS_CLIENT_USER`
+pimsclient needs an authenticated `requests.Session()` object to interact with PIMS API.
+Check with the admins of the PIMS API server for credentials 
 
 # Contributing
 You can contribute in different ways

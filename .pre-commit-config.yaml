@@ -1,5 +1,6 @@
 default_language_version:
   python: python3
+exclude: pimsclient/autogen  # avoid terrible black+mypy fights
 repos:
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.32.0
@@ -16,7 +17,6 @@ repos:
     rev: 5.0.4
     hooks:
       - id: flake8
-        exclude: dicomtrolley/xml_templates.py
         language: python
         additional_dependencies:
           - flake8-bugbear
@@ -28,7 +28,9 @@ repos:
     rev: 'v0.942'
     hooks:
       - id: mypy
+        exclude: "pimsclient/swagger_models_v0.*"
         additional_dependencies:
+          - mypy
           - pydantic
           - types-requests
           - types-Jinja2

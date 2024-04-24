@@ -1,12 +1,14 @@
+"""Check whether a keyfile contains identities"""
 import logging
 from pathlib import Path
 
 from pimsclient.auth.msal import quick_auth_with_cert
 from pimsclient.client import AuthenticatedClient
+from pimsclient.core import PatientID, PseudoPatientID
 from pimsclient.keyfile import KeyFile
 from pimsclient.server import PIMSServer
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 with open("/home/sjoerd/ticketdata/G00109/certificate.pem") as f:
     public_key = f.read()
@@ -19,8 +21,14 @@ session = quick_auth_with_cert(
     radboud_id="b208fe69-471e-48c4-8d87-025e9b9a157f",
 )
 
+
 client = AuthenticatedClient(session=session)
 server = PIMSServer(url="https://pims.radboudumc.nl/api/v0")
 keyfile = KeyFile.init_from_id(keyfile_id=49, client=client, server=server)
 
-print(f"Connected to {keyfile}")
+response = keyfile.exists(
+    [PatientID("g5123"), PatientID("1234"), PseudoPatientID("Patient000786")]
+)
+
+for item, exists in response.items():
+    print(f"{str(item)} - {exists}")

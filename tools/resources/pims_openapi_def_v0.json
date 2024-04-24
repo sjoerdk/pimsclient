@@ -1,0 +1,6727 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "PIMS API",
+    "description": "Web API for PIMS",
+    "contact": {
+      "name": "Radboudumc RTC Data Stewardship",
+      "email": "no@body.nl"
+    },
+    "version": "0"
+  },
+  "paths": {
+    "/api/v0/Activities": {
+      "get": {
+        "tags": [
+          "Activities"
+        ],
+        "summary": "Find activities",
+        "operationId": "GetActivities",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "query",
+            "description": "if specified, limits activities to this keyfile",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "activityID",
+            "in": "query",
+            "description": "If specified, limits activities to this activity",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "description": "if specified, limits activities for this user (must be admin if this user isn't you)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "description": "search for a description",
+            "schema": {
+              "$ref": "#/components/schemas/ActivityDescriptions"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Min date of activity",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Max date of activity",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Field to sort on",
+            "schema": {
+              "$ref": "#/components/schemas/ActivityFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Activities/{activityID}": {
+      "get": {
+        "tags": [
+          "Activities"
+        ],
+        "summary": "Get activity effects",
+        "operationId": "GetActivityDetails",
+        "parameters": [
+          {
+            "name": "activityID",
+            "in": "path",
+            "description": "The activity",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Activities"
+        ],
+        "summary": "Undo Activity",
+        "operationId": "UpdateActivity",
+        "parameters": [
+          {
+            "name": "activityID",
+            "in": "path",
+            "description": "The activity",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Common/Ping": {
+      "get": {
+        "tags": [
+          "Common"
+        ],
+        "summary": "Ping the server, will only fail if something is wrong",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v0/Common/AuthenticatedPing": {
+      "get": {
+        "tags": [
+          "Common"
+        ],
+        "summary": "Ping the server, will only fail if something is wrong or user is not authenticated",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Common/Status": {
+      "get": {
+        "tags": [
+          "Common"
+        ],
+        "summary": "Get status messages",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusMessage"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusMessage"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusMessage"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataFields/{id}": {
+      "get": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "Returns a single data field",
+        "operationId": "GetDataField",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Datafield id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "Delete/clear a data field",
+        "operationId": "DeleteDataField",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Datafield id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataFields": {
+      "get": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "Return a list of data fields",
+        "operationId": "ListDataFields",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Field to search in. only 'Value' column is supported currently",
+            "schema": {
+              "$ref": "#/components/schemas/DataFieldFields"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Search for a specific value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by Name, Value, IdentityId, DataHeaderID.",
+            "schema": {
+              "$ref": "#/components/schemas/DataFieldFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page Size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "dataHeaderIds",
+            "in": "query",
+            "description": "List of headers to return, if empty returns all.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "name": "pseudonyms",
+            "in": "query",
+            "description": "List of pseudonyms to return, if empty returns all.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "Create a new datafield",
+        "operationId": "CreateDataField",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataFieldRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataFieldRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataFieldRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "Update data field",
+        "operationId": "UpdateDataField",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataFieldRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataFieldRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataFieldRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataFields/Versions": {
+      "get": {
+        "tags": [
+          "DataFields"
+        ],
+        "summary": "List all version of one data field",
+        "operationId": "GetDataFieldVersions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Datafield ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "headerId",
+            "in": "query",
+            "description": "Header ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "identity",
+            "in": "query",
+            "description": "Identity of row",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "identitySource",
+            "in": "query",
+            "description": "Identity source of row",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pseudonym",
+            "in": "query",
+            "description": "Pseudonym of row",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataFieldResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataHeaders/{id}": {
+      "get": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "Get one data header",
+        "operationId": "GetDataHeader",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Dataheader ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "Delete a header (including associated data fields",
+        "operationId": "DeleteDataHeader",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Header ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataHeaders/{id}/Versions": {
+      "get": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "List all version of one data header",
+        "operationId": "GetDataHeaderVersions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Dataheader ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/DataHeaders": {
+      "get": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "List all date headers in a keyfile",
+        "operationId": "ListDataHeaders",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Field to search in (defaults to displayOrder + name)",
+            "schema": {
+              "$ref": "#/components/schemas/DataHeaderFields"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Search query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Order by ID, Description or Name",
+            "schema": {
+              "$ref": "#/components/schemas/DataHeaderFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "order descending",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "activityID",
+            "in": "query",
+            "description": "Return headers modified by this activity",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Include headers that were previously deleted",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "Create data header",
+        "operationId": "CreateDataHeader",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataHeaderRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataHeaderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDataHeaderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "DataHeaders"
+        ],
+        "summary": "Update data header",
+        "operationId": "UpdateDataHeader",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataHeaderRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataHeaderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDataHeaderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataHeaderResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "UploadFile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files/{id}": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "GetFileInitial",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "GetFile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileOptions"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileOptions"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSet"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files/deidentified/{id}": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "GetDeidentifiedFile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files/{id}/deidentify": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "DeidentifyFile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymisationResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymisationResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymisationResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files/deidentify": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "DeidentifyData",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymisationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Files/reidentify": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Reidentify a dataset towards a secific keyfile",
+        "operationId": "ReidentifyDataSet",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "returnIdentities",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "dataFilterValue",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterField",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterValue1",
+            "in": "query",
+            "description": "Second filter (AND)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterField1",
+            "in": "query",
+            "description": "Second filter (AND)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities": {
+      "head": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Check if a identity exists",
+        "operationId": "CheckIdentity",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to check",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "identity",
+            "in": "query",
+            "description": "The identity to check",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "identitySource",
+            "in": "query",
+            "description": "The identitySource to check",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Get a identity",
+        "operationId": "GetIdentity",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "identity",
+            "in": "query",
+            "description": "The identity to search for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "identitySource",
+            "in": "query",
+            "description": "The identity source to search for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Create a new identity",
+        "operationId": "CreateIdentity",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Identity creation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Update a identity (change its pseudonym)",
+        "operationId": "UpdateIdentity",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Identity update parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdentityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdentityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIdentityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/exists": {
+      "post": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Check if many identities exists in one go",
+        "operationId": "CheckIdentities",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to check",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The identities to check",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentitiesRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentitiesRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentitiesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/sources": {
+      "get": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Return a list of all used identitysources",
+        "operationId": "ListIdentitySources",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/{id}": {
+      "get": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Get a identity",
+        "operationId": "GetIdentityById",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The identity+pseudonym id to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Delete a pseudonym+identity by its id (same as DELETE pseudonyms/{id})",
+        "operationId": "DeleteIdentity",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The pseudonym to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/{id}/Versions": {
+      "get": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "List all version of one identity",
+        "operationId": "GetIdentityVersions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identity ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/Deleted": {
+      "get": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "List all deleted identies",
+        "operationId": "GetDeletedIdentities",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Identities/reidentify": {
+      "post": {
+        "tags": [
+          "Identities"
+        ],
+        "summary": "Reidentify returns a selection of identities+pseudonyms based on a query of pseudonyms, identities and data columns",
+        "operationId": "ReidentifyDataSelection",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "returnIdentities",
+            "in": "query",
+            "description": "Return identity information",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "dataFilterValue",
+            "in": "query",
+            "description": "search for a particular data field contents",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterField",
+            "in": "query",
+            "description": "specify the column to search in",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterValue1",
+            "in": "query",
+            "description": "second search filter (AND)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataFilterField1",
+            "in": "query",
+            "description": "second search filter (AND)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "includeDeletedRows",
+            "in": "query",
+            "description": "Include deleted identities",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "includeDeletedColumns",
+            "in": "query",
+            "description": "Include deleted columns",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Query request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReidentificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReidentificationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReidentificationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReidentificationResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Get a specific keyfile",
+        "operationId": "GetKeyfile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Primary key of the keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "If a previous version of the keyfile is required, enter date here",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Delete a keyfile (might fail if it has data, in which case set the 'deletable' flag and ask an admin to remove it).",
+        "operationId": "DeleteKeyfile",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Primary key of the keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "List or find a keyfile you have access to",
+        "operationId": "ListKeyfiles",
+        "parameters": [
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Column to search (defaults to name + description)",
+            "schema": {
+              "$ref": "#/components/schemas/KeyfileFields"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Value to search (when searching creation or archival date, please use ISO standard. you may prepend the date with a > or < character to search for dates before or after the given search term).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Sorting (Name, Activities or creationdate)",
+            "schema": {
+              "$ref": "#/components/schemas/KeyfileFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "sort direction",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "description": "return keyfiles in archived state",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "activityID",
+            "in": "query",
+            "description": "return keyfiles affected by activity",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Create a new keyfile",
+        "operationId": "CreateKeyfile",
+        "requestBody": {
+          "description": "keyfile creation information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Update an existing keyfile",
+        "operationId": "UpdateKeyfile",
+        "requestBody": {
+          "description": "keyfile update information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Versions": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "List all version of one keyfile",
+        "operationId": "GetKeyfileVersions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/AccessLog": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Download access log of keyfile",
+        "operationId": "GetKeyfileLogs",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/Test": {
+      "post": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Test a pseudonym template by generating example pseudonyms",
+        "operationId": "TestPseudonymTemplate",
+        "requestBody": {
+          "description": "Test data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestKeyfilePseudonymTemplateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestKeyfilePseudonymTemplateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestKeyfilePseudonymTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/Keyfiles/{id}": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Get a specific keyfile",
+        "operationId": "AdminGetKeyfile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Primary key of the keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "If a previous version of the keyfile is required, enter date here",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Delete a keyfile",
+        "operationId": "AdminDeleteKeyfile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Primary key of the keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/Keyfiles/{keyfileId}/AccessLog": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Download access log of keyfile",
+        "operationId": "AdminGetKeyfileLogs",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/Keyfiles": {
+      "get": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "List or find a keyfile you have access to",
+        "operationId": "AdminGetKeyfiles",
+        "parameters": [
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Field to search in",
+            "schema": {
+              "$ref": "#/components/schemas/KeyfileFields"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Value to search (when searching creation or archival date, please use ISO standard. you may prepend the date with a > or < character to search for dates before or after the given search term).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Sort column",
+            "schema": {
+              "$ref": "#/components/schemas/KeyfileFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "userid_or_upn",
+            "in": "query",
+            "description": "userid to look up keyfiles for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "description": "return keyfiles in archived state",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "activityID",
+            "in": "query",
+            "description": "return keyfiles affected by activity",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Create a new keyfile",
+        "operationId": "AdminCreateKeyfile",
+        "requestBody": {
+          "description": "keyfile creation information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileWithOwnerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileWithOwnerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyfileWithOwnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Keyfiles"
+        ],
+        "summary": "Update an existing keyfile",
+        "operationId": "AdminUpdateKeyfile",
+        "requestBody": {
+          "description": "keyfile update information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKeyfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/stats": {
+      "get": {
+        "tags": [
+          "Logging"
+        ],
+        "operationId": "AdminGetStats",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/logs": {
+      "get": {
+        "tags": [
+          "Logging"
+        ],
+        "operationId": "AdminListLogs",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringPagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringPagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringPagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Logging"
+        ],
+        "operationId": "AdminDeleteLogs",
+        "parameters": [
+          {
+            "name": "logname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/log": {
+      "get": {
+        "tags": [
+          "Logging"
+        ],
+        "operationId": "AdminGetLog",
+        "parameters": [
+          {
+            "name": "logname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Members/RoleDefinitions": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Get a list of all role definitions, including what each can or cant do.",
+        "operationId": "ListRoleDefinitions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDefinitionPagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDefinitionPagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDefinitionPagedResults"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Members": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Find members in a keyfile.",
+        "operationId": "GetMembers",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to look in to.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Search for a particular user or role.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Filter field.",
+            "schema": {
+              "$ref": "#/components/schemas/RoleFields"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "$ref": "#/components/schemas/RoleFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Update the roles for a keyfile",
+        "operationId": "UpdateMember",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The role to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Update the roles for a keyfile",
+        "operationId": "UpdateMember",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The role to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Remove a member from a keyfile",
+        "operationId": "DeleteMember",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userid",
+            "in": "query",
+            "description": "the user to remove",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Admin/Keyfiles/{keyfileId}/Members/RoleDefinitions": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Get a list of all role definitions, including what each can or cant do.",
+        "operationId": "AdminGetRoleDefinitions",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleDefinition"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleDefinition"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v0/Admin/Keyfiles/{keyfileId}/Members": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Find members in a keyfile.",
+        "operationId": "AdminGetMembers",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to look in to.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "Search for a particular user.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Filter by role definition id or user.",
+            "schema": {
+              "$ref": "#/components/schemas/RoleFields"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Sort field",
+            "schema": {
+              "$ref": "#/components/schemas/RoleFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort descending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Update the roles for a keyfile",
+        "operationId": "AdminUpdateMembers",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The role to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Update the roles for a keyfile",
+        "operationId": "AdminUpdateMembers",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The role to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Remove a member from a keyfile",
+        "operationId": "AdminDeleteMember",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userid",
+            "in": "query",
+            "description": "the user to remove",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Pseudonyms/{pseudonym}": {
+      "head": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Check if a pseudonym exists",
+        "operationId": "CheckPseudonym",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to check",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pseudonym",
+            "in": "path",
+            "description": "The pseudonym to check",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Pseudonyms/exists": {
+      "post": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Check if many pseudonyms exists in one go",
+        "operationId": "CheckPseudonyms",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile to check",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The pseudonyms to check",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PseudonymsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Pseudonyms": {
+      "get": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Get a pseudonym",
+        "operationId": "GetPseudonym",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pseudonym",
+            "in": "query",
+            "description": "The pseudonym to search for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Create a new pseudonym",
+        "operationId": "CreatePseudonym",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Pseudonym creation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePseudonymIdentityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Update a pseudonym (change its identity/identiysource)",
+        "operationId": "UpdatePseudonym",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfiile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Pseudonym update parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePseudonymRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePseudonymRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePseudonymRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Pseudonyms/{id}": {
+      "get": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Get a pseudonym",
+        "operationId": "GetPseudonymById",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The identity+pseudonym id to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Delete a pseudonym+identity by its id (same as DELETE identities/{id})",
+        "operationId": "DeletePseudonym",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "The keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The pseudonym to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Keyfiles/{keyfileId}/Pseudonyms/generate/{count}": {
+      "post": {
+        "tags": [
+          "Pseudonyms"
+        ],
+        "summary": "Create a x number of pseudonyms using the keyfiles' pseudonymTemplate",
+        "operationId": "GeneratePseudonyms",
+        "parameters": [
+          {
+            "name": "keyfileId",
+            "in": "path",
+            "description": "Keyfile",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "count",
+            "in": "path",
+            "description": "Number of pseudonyms to create",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PseudonymIdentityResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Users/PIMS": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Find users by (partial) name or email",
+        "operationId": "FindKeyfileUsers",
+        "parameters": [
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "(partial) Name or email to search for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterField",
+            "in": "query",
+            "description": "Field to search in",
+            "schema": {
+              "$ref": "#/components/schemas/UserFields"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Sort direction",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "number of users to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "includeBanned",
+            "in": "query",
+            "description": "Include banned users (only admins)",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v0/Users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Find users by (partial) name or email",
+        "operationId": "FindActiveDirectoryUsers",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "(partial) Name or email to search for. If the query starts with 'Service principal:', searches service principals. Append applicationid or partial name to search within service principals",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "number of users to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponsePagedResults"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "[admin only]\r\nUpdates users' fields. Note: changes to displayname and email will be overwritten the next time the AD is synced.",
+        "parameters": [
+          {
+            "name": "reason",
+            "in": "query",
+            "description": "Reason for editing the user",
+            "schema": {
+              "maxLength": 128,
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The user to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivityDescriptions": {
+        "enum": [
+          "None",
+          "UpdateWebhook",
+          "CreateKeyfile",
+          "UpdateKeyfile",
+          "ArchiveKeyfile",
+          "UnarchiveKeyfile",
+          "DeleteKeyfile",
+          "AddUser",
+          "UpdateUser",
+          "DeleteUser",
+          "AddOrUpdateRole",
+          "RemoveRole",
+          "CreateDataHeader",
+          "UpdateDataHeader",
+          "DeleteDataHeader",
+          "CreateDataField",
+          "UpdateDataField",
+          "DeleteDataField",
+          "CreatePseudonym",
+          "UpdatePseudonym",
+          "DeletePseudonym",
+          "CreateIdentity",
+          "DeleteIdentity",
+          "CreatePseudonymWithData",
+          "Pseudonymize",
+          "Reidentify",
+          "ReidentifyIdentities",
+          "ReidentifyTowardsFile",
+          "ReidentifyIdentitiesTowardsFile",
+          "RepseudonymizeToOtherKeyfile",
+          "RepseudonymizeFromOtherKeyfile",
+          "UndoActivity",
+          "CheckPseudonyms",
+          "CheckIdentities",
+          "GetIdentityByPseudonym",
+          "GetIdentity",
+          "MigrationEvent",
+          "MigratedEvent",
+          "MarkDeletableKeyfile"
+        ],
+        "type": "string"
+      },
+      "ActivityFields": {
+        "enum": [
+          "None",
+          "ID",
+          "User",
+          "Activity",
+          "Date",
+          "Keyfile",
+          "Description"
+        ],
+        "type": "string"
+      },
+      "ActivityResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary Key.",
+            "format": "int64"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "activity": {
+            "type": "string",
+            "description": "Descriptive name of the activity.",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "description": "Date at which the activity took place.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "keyfileID": {
+            "type": "integer",
+            "description": "Primary key of the Keyfile affected or involved.",
+            "format": "int64",
+            "nullable": true
+          },
+          "undoActivityID": {
+            "type": "integer",
+            "description": "If this activity was undone, this is a refernece to the undo-activity",
+            "format": "int64",
+            "nullable": true
+          },
+          "additionalInformation": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": "Optional details.",
+            "nullable": true
+          },
+          "formattedMessage": {
+            "type": "string",
+            "description": "Formatted detailed message",
+            "nullable": true
+          },
+          "extraInformation": {
+            "type": "string",
+            "description": "Link to details",
+            "nullable": true
+          },
+          "extraMessages": {
+            "type": "string",
+            "description": "Additional field containing messages about an activiy that is not stored in the database, e.g. row-for-row details concerning pseudonymisation.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActivityResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateDataFieldRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "string",
+            "description": "Identity to link this field with (required if using identities to identify the row to connect this with, optional if using pseudonyms).",
+            "nullable": true
+          },
+          "identitySource": {
+            "type": "string",
+            "description": "Identity source to link this field with (required if using identities to identify the row to connect this with, optional if using pseudonyms).",
+            "nullable": true
+          },
+          "pseudonym": {
+            "type": "string",
+            "description": "Pseudonym to link this field with (not to be used if using identities to identify the row to connect this with, required if using pseudonyms).",
+            "nullable": true
+          },
+          "headerID": {
+            "type": "integer",
+            "description": "Primary key of the header under which this field should be placed",
+            "format": "int64"
+          },
+          "value": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string",
+            "description": "Field value (always string)\r\nData is always stored as-is, as a string. data offered as object (int, floats, booleans, datetime) in e.g. excel files will be converted to string (ISO-compliant formatting)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateDataHeaderRequest": {
+        "required": [
+          "name",
+          "valueType"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string",
+            "description": "Name of the data header"
+          },
+          "description": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string",
+            "description": "Description of the header",
+            "nullable": true
+          },
+          "valueType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Type of the header, used to translate to a browser-compatible input.\r\nex. text, number, datetime, date, time, phone"
+          },
+          "defaultAction": {
+            "$ref": "#/components/schemas/PseudonymisationAction"
+          },
+          "validation": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string",
+            "description": "Validation for this column. This will be triggered whenever a field is added, but not when that happens as part of a bulk upload. Valid options are:\r\nemail()\r\nlength(min)\r\nlength(min, max)\r\nphone()\r\nregex([regex])\r\nrange(min,max)\r\noptions(option1, option2, option3)",
+            "nullable": true
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Display order",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateKeyfileRequest": {
+        "required": [
+          "name",
+          "pseudonymTemplate"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string",
+            "description": "Name of the keyfile."
+          },
+          "pseudonymTemplate": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string",
+            "description": "Pseudonymtemplate.\r\nThe pseudonymtemplate consist of sections cordoned of with a pipe symbol (|). Each section consists of a section type marker in the form of a single character followed by a number or text.\r\nFor more info see help page."
+          },
+          "description": {
+            "maxLength": 1024,
+            "type": "string",
+            "description": "A optional description of the keyfile.",
+            "nullable": true
+          },
+          "sequenceNumber": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Sequence number. A number that is incremented each time it is used, therefor offering a source for generating a pseudonym containing a sequential number (using the sxxx section).\r\nThe use of sequential numbers is not recommended if the order in which participants are added to your keyfile can potentially expose which pseudonym is which participant.\r\nOnce set, a sequence number can only go up.",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateKeyfileWithOwnerRequest": {
+        "required": [
+          "name",
+          "owner",
+          "pseudonymTemplate"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string",
+            "description": "Name of the keyfile."
+          },
+          "pseudonymTemplate": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string",
+            "description": "Pseudonymtemplate.\r\nThe pseudonymtemplate consist of sections cordoned of with a pipe symbol (|). Each section consists of a section type marker in the form of a single character followed by a number or text.\r\nFor more info see help page."
+          },
+          "description": {
+            "maxLength": 1024,
+            "type": "string",
+            "description": "A optional description of the keyfile.",
+            "nullable": true
+          },
+          "sequenceNumber": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Sequence number. A number that is incremented each time it is used, therefor offering a source for generating a pseudonym containing a sequential number (using the sxxx section).\r\nThe use of sequential numbers is not recommended if the order in which participants are added to your keyfile can potentially expose which pseudonym is which participant.\r\nOnce set, a sequence number can only go up.",
+            "format": "int64"
+          },
+          "owner": {
+            "type": "string",
+            "description": "THe owner (AzureAD ObjectID) of the keyfile",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreatePseudonymIdentityRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxLength": 512,
+            "type": "string",
+            "description": "Identity to add (e.g. patient number)",
+            "nullable": true
+          },
+          "identitySource": {
+            "maxLength": 256,
+            "type": "string",
+            "description": "Identity source to add (e.g. patientMrn).\r\nUsed to distinguish patient numbers from different institutions and/or similar-looking identifiers.",
+            "nullable": true
+          },
+          "pseudonym": {
+            "maxLength": 512,
+            "type": "string",
+            "description": "Pseudonym to use",
+            "nullable": true
+          },
+          "generatePseudonym": {
+            "type": "boolean",
+            "description": "If true, will generate a new pseudonym using the keyfile's template; otherwise, the given pseudonym will be used. Defaults to True"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateDataFieldRequest"
+            },
+            "description": "if present, fields will be added to the entry; If they do not pass validation, no action will take place",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateUserRoleRequest": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "string",
+            "description": "Primary key of the user row (AzureAD ObjectID)",
+            "format": "uuid"
+          },
+          "roleDefinitionID": {
+            "type": "string",
+            "description": "Role definition ID, refers to one of the role definitions granted to this user",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataFieldFields": {
+        "enum": [
+          "None",
+          "Identity",
+          "Value",
+          "DataHeader",
+          "ID"
+        ],
+        "type": "string"
+      },
+      "DataFieldResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the data field",
+            "format": "int64",
+            "nullable": true
+          },
+          "headerID": {
+            "type": "integer",
+            "description": "Primary key of the data header",
+            "format": "int64",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "description": "Field value (always string)",
+            "nullable": true
+          },
+          "activity": {
+            "$ref": "#/components/schemas/ActivityResponse"
+          },
+          "versionInfo": {
+            "$ref": "#/components/schemas/VersionInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataFieldResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataFieldResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataHeaderFields": {
+        "enum": [
+          "None",
+          "ID",
+          "Name",
+          "Description",
+          "ValueType",
+          "DisplayOrder"
+        ],
+        "type": "string"
+      },
+      "DataHeaderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the data header",
+            "format": "int64",
+            "nullable": true
+          },
+          "keyfileID": {
+            "type": "integer",
+            "description": "Primary key of the data header keyfile",
+            "format": "int64",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the data header",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the header",
+            "nullable": true
+          },
+          "valueType": {
+            "type": "string",
+            "description": "Type of the header, used to translate to a browser-compatible input.",
+            "nullable": true
+          },
+          "defaultAction": {
+            "$ref": "#/components/schemas/PseudonymisationAction"
+          },
+          "validation": {
+            "type": "string",
+            "description": "Validation rule",
+            "nullable": true
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Column display order (GUI)",
+            "format": "int32",
+            "nullable": true
+          },
+          "activity": {
+            "$ref": "#/components/schemas/ActivityResponse"
+          },
+          "versionInfo": {
+            "$ref": "#/components/schemas/VersionInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataHeaderResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataHeaderResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataSet": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonDataHeader"
+            },
+            "nullable": true
+          },
+          "suggestedOptions": {
+            "$ref": "#/components/schemas/FileOptions"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileOptions": {
+        "type": "object",
+        "properties": {
+          "textCharacter": {
+            "type": "string",
+            "nullable": true
+          },
+          "splitCharacter": {
+            "type": "string",
+            "nullable": true
+          },
+          "range": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstLineIsHeaders": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "commentPrefix": {
+            "type": "string",
+            "nullable": true
+          },
+          "suggestedHeaders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonDataHeader"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentitiesReidentificationRequest": {
+        "required": [
+          "identitySource",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of 1-1000 identities to reidentify"
+          },
+          "identitySource": {
+            "minLength": 1,
+            "type": "string",
+            "description": "A identitysource to reidentify"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentitiesRequest": {
+        "required": [
+          "identities",
+          "identitySource"
+        ],
+        "type": "object",
+        "properties": {
+          "identitySource": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Identity source, e.g. PatientMrn"
+          },
+          "identities": {
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of identities, e.g. patient numbers, one per line"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JsonDataHeader": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "pseudonymisationAction": {
+            "$ref": "#/components/schemas/PseudonymisationAction"
+          },
+          "values": {
+            "type": "array",
+            "items": { },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KeyfileFields": {
+        "enum": [
+          "None",
+          "ID",
+          "Name",
+          "Description",
+          "Archived",
+          "Deletable",
+          "Activities",
+          "Created"
+        ],
+        "type": "string"
+      },
+      "KeyfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "pseudonymTemplate": {
+            "type": "string",
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRoleResponse"
+            },
+            "nullable": true
+          },
+          "archived": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletable": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "activities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityResponse"
+            },
+            "nullable": true
+          },
+          "sequenceNumber": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/ActivityResponse"
+          },
+          "versionInfo": {
+            "$ref": "#/components/schemas/VersionInfo"
+          },
+          "webhookActivities": {
+            "type": "string",
+            "nullable": true
+          },
+          "webhookStatusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "webhookUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "webhookStatus": {
+            "$ref": "#/components/schemas/WebhookState"
+          },
+          "lastwebhookCall": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "defaultIdentitySource": {
+            "type": "string",
+            "nullable": true
+          },
+          "showReidentifyAllButton": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KeyfileResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KeyfileResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LogLevel": {
+        "enum": [
+          "Trace",
+          "Debug",
+          "Information",
+          "Warning",
+          "Error",
+          "Critical",
+          "None"
+        ],
+        "type": "string"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "PseudonymIdentityResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the identity. Usually not returned unless user has authority to view them",
+            "format": "int64",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "description": "Identity of this entry (empty if not authorised or not set)",
+            "nullable": true
+          },
+          "identitySource": {
+            "type": "string",
+            "description": "Identity sourrce of this entry (empty if not authorised or not set)",
+            "nullable": true
+          },
+          "pseudonym": {
+            "type": "string",
+            "description": "Pseudonym of this entry (empty if not authorised or not set)",
+            "nullable": true
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataFieldResponse"
+            },
+            "description": "Field values returned for reidentification purposes. Empty if no data is requested.",
+            "nullable": true
+          },
+          "activity": {
+            "$ref": "#/components/schemas/ActivityResponse"
+          },
+          "versionInfo": {
+            "$ref": "#/components/schemas/VersionInfo"
+          },
+          "dataResponse": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PseudonymIdentityResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PseudonymIdentityResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PseudonymisationAction": {
+        "enum": [
+          "Store",
+          "Pseudonym",
+          "Identifier",
+          "IdentitySource",
+          "PseudonymFromOtherKeyfile",
+          "PseudonymOutput",
+          "None",
+          "Clear",
+          "Return_masked",
+          "Return_masked_yyyy"
+        ],
+        "type": "string"
+      },
+      "PseudonymisationRequest": {
+        "required": [
+          "fileOptions"
+        ],
+        "type": "object",
+        "properties": {
+          "fileOptions": {
+            "$ref": "#/components/schemas/FileOptions"
+          },
+          "targetKeyfileID": {
+            "type": "integer",
+            "description": "Optional keyfile id, in case you want to send this data to another keyfile that already exists.",
+            "format": "int64",
+            "nullable": true
+          },
+          "identitySource": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string",
+            "description": "Optional if you want to use one identity source for all input rows. Otherwise, you can mark a column as identitysource to have (optionally) different sources in a single file.",
+            "nullable": true
+          },
+          "targetKeyfile": {
+            "$ref": "#/components/schemas/CreateKeyfileRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PseudonymisationResults": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonDataHeader"
+            },
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PseudonymsReidentificationRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of 1-1000 pseudonyms to reidentify"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PseudonymsRequest": {
+        "required": [
+          "pseudonyms"
+        ],
+        "type": "object",
+        "properties": {
+          "pseudonyms": {
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of pseudonymns, between 1 and 1000 long."
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReidentificationRequest": {
+        "type": "object",
+        "properties": {
+          "pseudonyms": {
+            "$ref": "#/components/schemas/PseudonymsReidentificationRequest"
+          },
+          "identities": {
+            "$ref": "#/components/schemas/IdentitiesReidentificationRequest"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of columns to reidentify.",
+            "nullable": true
+          },
+          "targetKeyfileID": {
+            "type": "integer",
+            "description": "The id of an existing keyfile to copy the results to.",
+            "format": "int64",
+            "nullable": true
+          },
+          "activityID": {
+            "type": "integer",
+            "description": "Activity ID to reidentify",
+            "format": "int64",
+            "nullable": true
+          },
+          "targetKeyfile": {
+            "$ref": "#/components/schemas/CreateKeyfileRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReidentificationResult": {
+        "type": "object",
+        "properties": {
+          "pseudonyms": {
+            "$ref": "#/components/schemas/PseudonymIdentityResponsePagedResults"
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataHeaderResponse"
+            },
+            "description": "headers found in reidentification query.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoleDefinition": {
+        "type": "object",
+        "properties": {
+          "assignable": {
+            "type": "boolean",
+            "description": "Can the role be used?"
+          },
+          "id": {
+            "type": "string",
+            "description": "Role defintion ID, unique identifier",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nice name of the role",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "longer description of the role.",
+            "nullable": true
+          },
+          "actions": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TableAction"
+            },
+            "description": "Actions a user is allowed in this role.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoleDefinitionPagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleDefinition"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoleFields": {
+        "enum": [
+          "None",
+          "ID",
+          "User",
+          "RoleDefinitionID"
+        ],
+        "type": "string"
+      },
+      "SortDirection": {
+        "enum": [
+          "Ascending",
+          "Descending"
+        ],
+        "type": "string"
+      },
+      "StatusMessage": {
+        "type": "object",
+        "properties": {
+          "minValue": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "level": {
+            "$ref": "#/components/schemas/LogLevel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StringPagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TableAction": {
+        "enum": [
+          "None",
+          "Create",
+          "Read",
+          "Update",
+          "Delete",
+          "Audit",
+          "SetArchived",
+          "Deidentify",
+          "Reidentify"
+        ],
+        "type": "string"
+      },
+      "TestKeyfilePseudonymTemplateRequest": {
+        "required": [
+          "pseudonymTemplate"
+        ],
+        "type": "object",
+        "properties": {
+          "sequenceNumber": {
+            "type": "integer",
+            "description": "Sequence number. A number that is incremented each time it is used, therefor offering a source for generating a pseudonym containing a sequential number (using the sxxx section).\r\nSet this to a number > 0 if you want to test pseudonym generation with a higher start sequence number",
+            "format": "int64"
+          },
+          "pseudonymTemplate": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string",
+            "description": "Pseudonymtemplate.\r\nThe pseudonymtemplate consist of sections cordoned of with a pipe symbol (|). Each section consists of a section type marker in the form of a single character followed by a number or text.\r\nFor more info see help page."
+          },
+          "identitySources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of identity sources which can be used to activate different subsections of your keyfile template (see ':' section)",
+            "nullable": true
+          },
+          "count": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The number of pseudonyms to generate",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateDataFieldRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the data field",
+            "format": "int64"
+          },
+          "value": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string",
+            "description": "Updated field value (always string)\r\nData is always stored as-is, as a string. data offered as object (int, floats, booleans, datetime) in e.g. excel files will be converted to string (ISO-compliant formatting)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateDataHeaderRequest": {
+        "required": [
+          "name",
+          "valueType"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string",
+            "description": "Name of the data header"
+          },
+          "description": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string",
+            "description": "Description of the header",
+            "nullable": true
+          },
+          "valueType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Type of the header, used to translate to a browser-compatible input.\r\nex. text, number, datetime, date, time, phone"
+          },
+          "defaultAction": {
+            "$ref": "#/components/schemas/PseudonymisationAction"
+          },
+          "validation": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string",
+            "description": "Validation for this column. This will be triggered whenever a field is added, but not when that happens as part of a bulk upload. Valid options are:\r\nemail()\r\nlength(min)\r\nlength(min, max)\r\nphone()\r\nregex([regex])\r\nrange(min,max)\r\noptions(option1, option2, option3)",
+            "nullable": true
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Display order",
+            "format": "int32",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the data header",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateIdentityRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the identity to update",
+            "format": "int64"
+          },
+          "pseudonym": {
+            "maxLength": 512,
+            "type": "string",
+            "description": "The new pseudonym",
+            "nullable": true
+          },
+          "generatePseudonym": {
+            "type": "boolean",
+            "description": "If true, will generate a new pseudonym using the keyfile's template; otherwise, thge given pseudonym will be used."
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateKeyfileRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the keyfile",
+            "format": "int64"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string",
+            "description": "New name.",
+            "nullable": true
+          },
+          "pseudonymTemplate": {
+            "maxLength": 256,
+            "type": "string",
+            "description": "New pseudonymtemplate.",
+            "nullable": true
+          },
+          "description": {
+            "maxLength": 1024,
+            "type": "string",
+            "description": "New description.",
+            "nullable": true
+          },
+          "sequenceNumber": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "New sequencenumber (must be at least as high as the existing value).",
+            "format": "int64",
+            "nullable": true
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Set keyfile to archived state. An archived keyfile cannot be changed untill its status is reversed.",
+            "nullable": true
+          },
+          "deletable": {
+            "type": "boolean",
+            "description": "Set keyfile to deletable state. A keyfile can be deleted only if it does not contain data or by an admin only if the deletable flag is set.",
+            "nullable": true
+          },
+          "webhookActivities": {
+            "type": "string",
+            "description": "Activities that should trigger the webhook\r\nThis is matched against the 'event' value of an activity. *at the end or beginning are allowed, multiple patterns can be added using a comma.\r\n*keyfile matches createkeyfile, updatekeyfile, deletekeyfile, etc\r\ncreate* matches createkeyfile, createrole, etc.\r\ncreate*,*keyfile matches any activity captured by the patterns above\r\n* matches any activity",
+            "nullable": true
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Url to call to activate a webhook, which will be called (GET'ed) when a new activity is created in this keyfile\r\nThe url will be called with activity, activityID and keyfileID in the url's GET parameters\r\nPlease note that delivery of the call is not guaranteed; service interruptions may cause failure to deliver all actions in your keyfile.\r\nIn addition, the amount of times the webhookUrl is called is limited to X per minute (atm, X=4). Additional activities per minute are discarded",
+            "nullable": true
+          },
+          "webhookStatus": {
+            "$ref": "#/components/schemas/WebhookState"
+          },
+          "defaultIdentitySource": {
+            "type": "string",
+            "description": "Default identity source to display",
+            "nullable": true
+          },
+          "showReidentifyAllButton": {
+            "type": "boolean",
+            "description": "Whether to show the 'reidentify all' button directly in the GUI panel",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdatePseudonymRequest": {
+        "required": [
+          "identitySource",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of the identity to update",
+            "format": "int64"
+          },
+          "value": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string",
+            "description": "New identity"
+          },
+          "identitySource": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string",
+            "description": "New identity source"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Primary key (AzureAD ObjectID)",
+            "format": "uuid"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "If enabled is false, this user is blocked from using PIMS.",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserFields": {
+        "enum": [
+          "None",
+          "DisplayName",
+          "Email"
+        ],
+        "type": "string"
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Primary key (AzureAD ObjectID)",
+            "format": "uuid",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "If enabled is false, this user is blocked from using PIMS.",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "This users' displayname, as synced from AzureAD",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "This users' email address, as synced from AzureAD",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRoleResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Primary key of this role assignment",
+            "format": "int64"
+          },
+          "keyfileID": {
+            "type": "integer",
+            "description": "Primary key of this role assignments keyfile",
+            "format": "int64"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "roleDefinitionID": {
+            "type": "string",
+            "description": "Role definition ID, refers to one of the role definitions granted to this user",
+            "format": "uuid"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/ActivityResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRoleResponsePagedResults": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Current page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total amount of items, if calculated. Otherwise, this number will be (Page * PageSize).",
+            "format": "int64",
+            "nullable": true
+          },
+          "countComplete": {
+            "type": "boolean",
+            "description": "If set to true, the amount under TotalCount is not the actual total, but the total so far. You can still fetch more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRoleResponse"
+            },
+            "description": "The data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VersionInfo": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WebhookState": {
+        "enum": [
+          "Disabled",
+          "FinalRetry",
+          "SecondRetry",
+          "FirstRetry",
+          "Enabled"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/b208fe69-471e-48c4-8d87-025e9b9a157f/oauth2/v2.0/authorize",
+            "scopes": {
+              "api://4683335c-4d2c-419a-90e0-418ef25f8a16/access_as_user": "full access"
+            }
+          }
+        }
+      }
+    }
+  }
+}
