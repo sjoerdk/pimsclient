@@ -1,4 +1,7 @@
 # History
+## 2.0.2 (2024-04-24)
+* Downgrades pydantic to 1.8.2 to ease adoption in older projects
+
 ## 2.0.0 (2024-04-24)
 * Moves to support PIMS2 API
 * Rewrites all tests, most backend code
