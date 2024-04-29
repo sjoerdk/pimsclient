@@ -73,6 +73,24 @@ class PIMSServer:
         self.max_bulk_size: int = 20000
 
 
+def truncate(text, length=300):
+    """Make sure text length does not exceed length by truncating if needed"""
+
+    truncation_text = f"... (truncated from {len(text)} chars)"
+    max_space = length - len(truncation_text)
+    if max_space <= 30:
+        raise ValueError(
+            f"Cannot truncate string to {length}, "
+            f"I need {len(truncation_text)} chars for the "
+            f"truncation message itself. I would like to have at least"
+            f"30 characters for the message."
+        )
+    if len(text) <= length:
+        return text  # no truncation needed
+    else:
+        return text[:max_space] + truncation_text
+
+
 class EntryPath:
     r"""Models an API path
 
@@ -104,7 +122,7 @@ class EntryPath:
             If a 405 is found
         """
         logger.debug(
-            f"Checking response {response.status_code}: {response.text}"
+            f"Checking response {response.status_code}: {truncate(response.text)}"
         )
         if response.status_code == 200:  # OK
             return response
@@ -127,7 +145,7 @@ class EntryPath:
                 f"Server returned status_code '{response.status_code}': "
                 f"{response.text}"
             )
-            raise PIMSServerError(msg)
+            raise PIMSServerError(truncate(msg))
 
     @staticmethod
     def parse_json_to_object(
