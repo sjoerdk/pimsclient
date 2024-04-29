@@ -1,4 +1,7 @@
 # History
+## 2.0.3 (2024-04-29)
+* Truncates server error messages to 300 chars (refs #289)
+  
 ## 2.0.2 (2024-04-24)
 * Downgrades pydantic to 1.8.2 to ease adoption in older projects
 
