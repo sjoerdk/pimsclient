@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pimsclient"
-version = "2.0.2"
+version = "2.0.3"
 description = "Client for PIMS key_file management swagger web API"
 authors = ["sjoerdk <sjoerd.kerkstra@radboudumc.nl>"]
 license = "MIT"
