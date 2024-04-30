@@ -25,6 +25,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
 from msal import ConfidentialClientApplication
+from requests.auth import AuthBase
 
 from pimsclient.auth.exceptions import AuthError
 from pimsclient.logs import get_module_logger
@@ -158,6 +159,10 @@ class Tenant(MSALObject):
     def get_sp_access_token(self, request_for: Application, to_access: API):
         """Ask microsoft whether this tenant can request access to an API for the
         given application
+
+        Returns
+        -------
+        str
         """
         logger.info(
             f"{self.name}: Attempting to obtain access token for "
@@ -186,6 +191,47 @@ class Tenant(MSALObject):
                 f"Error was: {[(str(x),str(y)) for x,y in result.items()]}"
             )
             raise AuthError("Failed to obtain access token")
+
+
+def quick_obtain_token(
+    requester_id: str,
+    requester_public_key: str,
+    requester_private_key_file: Path,
+    pims_id: str,
+    radboud_id: str,
+) -> str:
+    """Get authenticated session token
+
+    Parameters
+    ----------
+    requester_id
+        microsoft auth id of the service principal (user) that you want to log in as
+    requester_public_key
+        authenticate with this public key
+    requester_private_key_file
+        prove you're the real requester with this
+    pims_id
+        microsoft auth id of the API you are trying to reach
+    radboud_id
+        microsoft auth id of the tenant which can authorize you to access
+
+    Returns
+    -------
+    requests.Session
+        authorized to use PIMS
+    """
+
+    requester = Application(
+        msal_id=requester_id,
+        name="requester",
+        certificate=SSLKeyPair(
+            public_key=requester_public_key,
+            private_key_file=requester_private_key_file,
+        ),
+    )
+    pims = API(msal_id=pims_id, name="PIMS", base_url="")
+    radboud = Tenant(msal_id=radboud_id, name="Radboudumc")
+    return radboud.get_sp_access_token(request_for=requester, to_access=pims)
 
 
 def quick_auth_with_cert(
@@ -232,3 +278,109 @@ def quick_auth_with_cert(
     return radboud.obtain_authorized_session(
         request_for=requester, to_access=pims
     )
+
+
+class MSALAuth(AuthBase):
+    """Can obtain tokens with microsoft AD
+
+    Raises
+    ------
+    PIMSClientError
+        If logging in fails
+
+    """
+
+    def __init__(
+        self,
+        requester_id: str,
+        requester_public_key: str,
+        requester_private_key_file: Path,
+        pims_id: str,
+        radboud_id: str,
+    ):
+        """Can obtain tokens with microsoft AD
+
+        Parameters
+        ----------
+        requester_id
+            microsoft auth id of the service principal (user) that you want to log
+            in as
+        requester_public_key
+            authenticate with this public key
+        requester_private_key_file
+            prove you're the real requester with this
+        pims_id
+            microsoft auth id of the API you are trying to reach
+        radboud_id
+            microsoft auth id of the tenant which can authorize you to access
+
+
+        Raises
+        ------
+        PIMSClientError
+            If logging in fails
+
+
+        Returns
+        -------
+        requests.Session
+            authorized to use PIMS
+        """
+
+        self.requester_id = requester_id
+        self.requester_public_key = requester_public_key
+        self.requester_private_key_file = requester_private_key_file
+        self.pims_id = pims_id
+        self.radboud_id = radboud_id
+        self._bearer_token = None
+
+    def response_hook(self, r, **kwargs):
+        """Called before returning response. Try to log if not authenticated
+
+        Parameters
+        ----------
+        r: Response
+
+        """
+        if r.status_code != 401:
+            # not an access denies issue. I can't do anything here
+            return r
+        else:
+            """Not logged in, try to obtain new session and retry request"""
+            self._bearer_token = self.get_token()  # get new token
+
+            # create a retry request with this new token
+            retry_request = r.request.copy()
+            retry_request.headers.update(self._bearer_token)
+            retry_response = r.connection.send(retry_request, **kwargs)
+
+            # make sure the retried response is now the official response
+            retry_response.history.append(r)
+            retry_response.request = retry_request
+
+            return retry_response
+
+    def get_token(self):
+        token = quick_obtain_token(
+            requester_id=self.requester_id,
+            requester_public_key=self.requester_public_key,
+            requester_private_key_file=self.requester_private_key_file,
+            pims_id=self.pims_id,
+            radboud_id=self.radboud_id,
+        )
+
+        return {"authorization": "bearer " + token}
+
+    def __call__(self, r):
+        """Called before sending the request"""
+
+        # Make sure keep alive because session is authenticated, not just the
+        # connection
+        r.headers["Connection"] = "Keep-Alive"
+        if not self._bearer_token:
+            self._bearer_token = (
+                self.get_token()
+            )  # first call, obtain new token
+        r.headers.update(self._bearer_token)
+        r.register_hook("response", self.response_hook)
+        return r

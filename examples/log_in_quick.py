@@ -6,10 +6,12 @@ Does not explain, just shows the quickest way. For more info see example
 
 from pathlib import Path
 
-from pimsclient.auth.msal import quick_auth_with_cert
+from requests import Session
 
+from pimsclient.auth.msal import MSALAuth
 
-session = quick_auth_with_cert(
+session = Session()
+session.auth = MSALAuth(
     requester_id="1789e794-241c-473b-9921-30e05d284b01",
     requester_public_key=open("/tmp/public_key").read(),
     requester_private_key_file=Path("/tmp/priv"),

@@ -2,10 +2,10 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
 
-from msal import ConfidentialClientApplication
+from requests import Session
 from requests_mock import ANY
 
-from pimsclient.auth.msal import quick_auth_with_cert
+from pimsclient.auth.msal import MSALAuth
 
 
 A_PUBLIC_CERT = """-----BEGIN CERTIFICATE-----
@@ -41,39 +41,47 @@ def test_re_login(requests_mock, monkeypatch):
     # Make msal login work
     requests_mock.register_uri(ANY, ANY, text="logged in great!")
     monkeypatch.setattr("builtins.open", lambda x: StringIO("some_priv_thing"))
-    mock_acquire_token = Mock(
-        return_value={"access_token": "a_token_from_microsoft"}
-    )
 
-    mock_app_return = Mock(spec=ConfidentialClientApplication)
-    mock_app_return.acquire_token_for_client = mock_acquire_token
-
-    def mock_app(*args, **kwargs):
-        return mock_app_return
-
-    monkeypatch.setattr(
-        "pimsclient.auth.msal.ConfidentialClientApplication", mock_app
-    )
-
-    # an msal session
-    session = quick_auth_with_cert(
+    # create an auth
+    auth = MSALAuth(
         requester_id="mock_requester_id",
         requester_public_key=A_PUBLIC_CERT,
         requester_private_key_file=Path("any file.. mocked above"),
         pims_id="mock_pims_id",
         radboud_id="mock_radboud_id",
     )
-    # One token should have been aquired
-    assert mock_acquire_token.call_count == 1
-    # do call. Should work
-    assert session.get("http://a_request")
-
-    # next call will not work
-    requests_mock.register_uri(
-        ANY, ANY, status_code=401, text="NOT ALLOWED FOOL"
+    # which can get a token without talking to any real Microsoft server
+    auth.get_token = Mock(
+        spec=MSALAuth.get_token,
+        return_value={"authorization": "bearer " + "OK_TOKEN"},
     )
-    # call again, oh no 401!
+    # Auth will start out with a token which is not accepted
+    auth._bearer_token = {"authorization": "bearer " + "BAD_TOKEN"}
+    session = Session()
+    session.auth = auth
+
+    # Make sure any all to any address will respond based on the authorization
+    # Header. OK_TOKEN will succeed, anything else will respond with 401
+    login_responses = []
+
+    def login_response(request, context):
+        login_responses.append(request)
+        if request.headers.get("authorization") == "bearer OK_TOKEN":
+            context.status_code = 200
+            return "FINE"
+        else:
+            context.status_code = 401
+            return "Not with that token you don't"
+
+    requests_mock.register_uri(ANY, ANY, text=login_response)
+
+    # no token obtaining call should have been done
+    assert auth.get_token.call_count == 0
+    # do call. Should have auto-obtained token now
     response = session.get("http://a_request")
-    assert response
-    # acquire token should have worked again
-    assert mock_acquire_token.call_count == 2
+    assert response.status_code == 200
+    assert auth.get_token.call_count == 1
+    assert (
+        len(requests_mock.request_history) == 2
+    )  # first request failed with 401
+    assert len(login_responses) == 2  # login was called twice

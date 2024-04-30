@@ -2,7 +2,9 @@
 import logging
 from pathlib import Path
 
-from pimsclient.auth.msal import quick_auth_with_cert
+from requests import Session
+
+from pimsclient.auth.msal import MSALAuth
 from pimsclient.client import AuthenticatedClient
 from pimsclient.core import (
     PatientID,
@@ -18,7 +20,8 @@ logging.basicConfig(level=logging.DEBUG)
 with open("/home/sjoerd/ticketdata/G00109/certificate.pem") as f:
     public_key = f.read()
 
-session = quick_auth_with_cert(
+session = Session()
+session.auth = MSALAuth(
     requester_id="1789e794-241c-473b-9921-30e05d284b01",
     requester_public_key=public_key,
     requester_private_key_file=Path("/tmp/priv"),
