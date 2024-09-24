@@ -287,7 +287,7 @@ class Files(EntryPath):
             targetKeyfileID=None,
             identitySource=None,
         )
-        print(f"sending {request.json()}")
+        logger.debug(f"sending {request.json()}")
 
         return self.check_and_parse(
             PseudonymisationResults, session.post(url, json=request.dict())

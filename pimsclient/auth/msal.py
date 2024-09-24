@@ -343,10 +343,11 @@ class MSALAuth(AuthBase):
 
         """
         if r.status_code != 401:
-            # not an access denies issue. I can't do anything here
+            # not an access denied issue. I can't do anything here
             return r
         else:
             """Not logged in, try to obtain new session and retry request"""
+            logger.debug("MSALAuth caught 401. Trying to re-obtain token")
             self._bearer_token = self.get_token()  # get new token
 
             # create a retry request with this new token
@@ -368,7 +369,7 @@ class MSALAuth(AuthBase):
             pims_id=self.pims_id,
             radboud_id=self.radboud_id,
         )
-
+        logger.debug("Token obtained.")
         return {"authorization": "bearer " + token}
 
     def __call__(self, r):
