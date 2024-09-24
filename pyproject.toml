@@ -4,6 +4,7 @@ version = "2.0.3"
 description = "Client for PIMS key_file management swagger web API"
 authors = ["sjoerdk <sjoerd.kerkstra@radboudumc.nl>"]
 license = "MIT"
+readme = "README.md"
 repository = "https://github.com/sjoerdk/pimsclient"
 
 [tool.poetry.dependencies]
