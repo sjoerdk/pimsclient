@@ -1,4 +1,7 @@
 # History
+## 2.1.0 (2024-09-24)
+* Adds Microsoft Authentication Library (MSAL) authorization with certificates, fixes #291
+
 ## 2.0.3 (2024-04-29)
 * Truncates server error messages to 300 chars (refs #289)
   
