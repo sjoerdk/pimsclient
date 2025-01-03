@@ -1,4 +1,7 @@
 # History
+## 2.1.1 (2025-01-03)
+* Adds KeyfileResponse.studyID parameter to API def. Fixes ResearchBureau/tickets#299
+
 ## 2.1.0 (2024-09-24)
 * Adds Microsoft Authentication Library (MSAL) authorization with certificates, fixes #291
 
