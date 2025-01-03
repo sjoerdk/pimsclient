@@ -844,6 +844,7 @@ class KeyfileResponse(BaseModel):
     sequenceNumber: Optional[int] = None
     activity: Optional[ActivityResponse] = None
     versionInfo: Optional[VersionInfo] = None
+    studyID: Optional[str] = None
     webhookActivities: Optional[str] = None
     webhookStatusMessage: Optional[str] = None
     webhookUrl: Optional[str] = None
