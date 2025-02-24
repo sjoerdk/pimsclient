@@ -484,7 +484,7 @@ class VersionInfo(BaseModel):
     class Config:
         extra = Extra.forbid
 
-    from_: Optional[datetime] = Field(None, alias='from')
+    from_: Optional[datetime] = Field(None, alias='from_')
     to: Optional[datetime] = None
 
 
