@@ -21,6 +21,6 @@ session = quick_auth_with_cert(
 
 client = AuthenticatedClient(session=session)
 server = PIMSServer(url="https://pims.radboudumc.nl/api/v0")
-keyfile = KeyFile.init_from_id(keyfile_id=49, client=client, server=server)
+keyfile = KeyFile.init_from_id(keyfile_id=634, client=client, server=server)
 
 print(f"Connected to {keyfile}")
