@@ -1,4 +1,7 @@
 # History
+## 2.2.0 (2025-06-02)
+* Moves from pydantic 1 to 2. Upgrades dependencies. Drops python 3.8
+
 ## 2.1.1 (2025-01-03)
 * Adds KeyfileResponse.studyID parameter to API def. Fixes ResearchBureau/tickets#299
 
