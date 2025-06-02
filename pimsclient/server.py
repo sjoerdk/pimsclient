@@ -287,7 +287,7 @@ class Files(EntryPath):
             targetKeyfileID=None,
             identitySource=None,
         )
-        logger.debug(f"sending {request.json()}")
+        logger.debug(f"sending {request.model_dump_json()}")
 
         return self.check_and_parse(
             PseudonymisationResults, session.post(url, json=request.dict())
@@ -340,7 +340,7 @@ class Identities(EntryPath):
             activityID=None,
         )
 
-        logger.debug(f"sending {request.json()} to {url}")
+        logger.debug(f"sending {request.model_dump_json()} to {url}")
 
         return self.check_and_parse(
             ReidentificationResult,
