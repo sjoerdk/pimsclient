@@ -16,8 +16,12 @@ from pimsclient.core import (
 from pimsclient.exceptions import InvalidPseudonymTemplateError
 from pimsclient.keyfile import KeyFile
 from pimsclient.server import PIMSServer
+from tests.conftest import set_mock_response
 from tests.factories import IdentifierFactory
-from tests.mock_responses import MockUrls
+from tests.mock_responses import (
+    GET_KEYFILE_RESPONSE_WITH_CHANGE,
+    MockUrls,
+)
 
 
 def test_keyfile(mock_pims_responses):
@@ -158,3 +162,16 @@ def test_project_assert_pseudonym_templates_realistic(a_keyfile):
         a_keyfile.assert_pseudonym_templates(
             should_have_a_template=expected_templates, should_exist=[]
         )
+
+
+def test_non_breaking_api_changes_allowed(requests_mock, a_keyfile):
+    """JSON parsing should not complain about extra fields. If the API responses add
+    fields these are considered optional and should not break pimsclient
+    Recreates sjoerdk/pimsclient#295
+    """
+
+    set_mock_response(requests_mock, GET_KEYFILE_RESPONSE_WITH_CHANGE)
+    client = AuthenticatedClient(session=session())
+    server = PIMSServer(url=MockUrls.SERVER_URL)
+    keyfile = KeyFile.init_from_id(keyfile_id=49, client=client, server=server)
+    assert keyfile
