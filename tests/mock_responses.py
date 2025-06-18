@@ -99,6 +99,25 @@ GET_KEYFILE_RESPONSE_WITH_CHANGE = MockResponse(
     'ish now with 1.3M entries","sequenceNumber":792,"activity":{"id":305092'
     '2},"webhookStatus":"Disabled","headerCount":2, "rowCount":0}',
 )
+
+# Response below has a string id element (should be int) should break
+GET_KEYFILE_RESPONSE_WITH_BREAKING_CHANGE = MockResponse(
+    url=re.compile(MockUrls.SERVER_URL + "/Keyfiles/.*"),
+    status_code=200,
+    method="GET",
+    text='{"id":"not an int","pseudonymTemplate":"Guid|:PatientID|'
+    "#Patient|S6|:StudyInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14|#."
+    "|N14|:SeriesInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14|#.|N14|:"
+    "SOPInstanceUID|#1.3.6.1.4.1.14519.5.2.1.9999.9999.|N14|#.|N14|:AccessionN"
+    'umber|N7|#.|N8","creationDate":"2019-09-06T15:35:33.6406867","members":['
+    '{"id":78,"keyfileID":49,"user":{"id":"9ffc9b24-f3a7-4d3a-bd90-4ae395d973'
+    'ec","displayName":"Service principal: 1789e794-241c-473b-9921-30e05d284b'
+    '01 (Image De-Identification Service (IDIS))","email":""},"roleDefinitio'
+    'nID":"5bc1c1bf-5ef9-4f0d-b27b-fa503755a15a","activity":{"id":3050922}}],"'
+    'deletable":false,"description":"Second test. First one is properly slugg'
+    'ish now with 1.3M entries","sequenceNumber":792,"activity":{"id":305092'
+    '2},"webhookStatus":"Disabled","headerCount":2, "rowCount":0}',
+)
 # Responds to any deidentify call with three pseudonym-identity pairs
 GET_DEIDENTIFY_RESPONSE = MockResponse(
     url=re.compile(

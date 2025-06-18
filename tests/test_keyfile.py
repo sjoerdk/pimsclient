@@ -15,10 +15,11 @@ from pimsclient.core import (
 )
 from pimsclient.exceptions import InvalidPseudonymTemplateError
 from pimsclient.keyfile import KeyFile
-from pimsclient.server import PIMSServer
+from pimsclient.server import PIMSServer, PIMSServerError
 from tests.conftest import set_mock_response
 from tests.factories import IdentifierFactory
 from tests.mock_responses import (
+    GET_KEYFILE_RESPONSE_WITH_BREAKING_CHANGE,
     GET_KEYFILE_RESPONSE_WITH_CHANGE,
     MockUrls,
 )
@@ -164,14 +165,26 @@ def test_project_assert_pseudonym_templates_realistic(a_keyfile):
         )
 
 
+class PIMSServerERror:
+    pass
+
+
 def test_non_breaking_api_changes_allowed(requests_mock, a_keyfile):
     """JSON parsing should not complain about extra fields. If the API responses add
     fields these are considered optional and should not break pimsclient
     Recreates sjoerdk/pimsclient#295
     """
 
+    # Extra optional field coming from server should not raise exceptions
     set_mock_response(requests_mock, GET_KEYFILE_RESPONSE_WITH_CHANGE)
     client = AuthenticatedClient(session=session())
     server = PIMSServer(url=MockUrls.SERVER_URL)
     keyfile = KeyFile.init_from_id(keyfile_id=49, client=client, server=server)
+
+    # but unexpected data types for know keys should still not be allowed.
+    set_mock_response(requests_mock, GET_KEYFILE_RESPONSE_WITH_BREAKING_CHANGE)
+    with pytest.raises(PIMSServerError):
+        keyfile = KeyFile.init_from_id(
+            keyfile_id=49, client=client, server=server
+        )
     assert keyfile

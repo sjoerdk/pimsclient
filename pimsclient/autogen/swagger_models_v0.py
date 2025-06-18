@@ -65,8 +65,6 @@ class ActivityFields(Enum):
 
 
 class CreateDataFieldRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     identity: Optional[str] = Field(
         None,
@@ -91,8 +89,6 @@ class CreateDataFieldRequest(BaseModel):
 
 
 class CreateKeyfileRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     name: constr(min_length=3, max_length=128) = Field(
         ..., description='Name of the keyfile.'
@@ -111,8 +107,6 @@ class CreateKeyfileRequest(BaseModel):
 
 
 class CreateKeyfileWithOwnerRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     name: constr(min_length=3, max_length=128) = Field(
         ..., description='Name of the keyfile.'
@@ -132,8 +126,6 @@ class CreateKeyfileWithOwnerRequest(BaseModel):
 
 
 class CreatePseudonymIdentityRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     value: Optional[constr(max_length=512)] = Field(
         None, description='Identity to add (e.g. patient number)'
@@ -156,8 +148,6 @@ class CreatePseudonymIdentityRequest(BaseModel):
 
 
 class CreateUserRoleRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     userID: Optional[UUID] = Field(
         None, description='Primary key of the user row (AzureAD ObjectID)'
@@ -186,8 +176,6 @@ class DataHeaderFields(Enum):
 
 
 class IdentitiesReidentificationRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     value: List[str] = Field(
         ...,
@@ -201,8 +189,6 @@ class IdentitiesReidentificationRequest(BaseModel):
 
 
 class IdentitiesRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     identitySource: constr(min_length=1) = Field(
         ..., description='Identity source, e.g. PatientMrn'
@@ -258,8 +244,6 @@ class PseudonymisationAction(Enum):
 
 
 class PseudonymsReidentificationRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     value: List[str] = Field(
         ...,
@@ -270,8 +254,6 @@ class PseudonymsReidentificationRequest(BaseModel):
 
 
 class PseudonymsRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     pseudonyms: List[str] = Field(
         ...,
@@ -282,8 +264,6 @@ class PseudonymsRequest(BaseModel):
 
 
 class ReidentificationRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     pseudonyms: Optional[PseudonymsReidentificationRequest] = None
     identities: Optional[IdentitiesReidentificationRequest] = None
@@ -310,8 +290,6 @@ class SortDirection(Enum):
 
 
 class StatusMessage(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     minValue: Optional[datetime] = None
     maxValue: Optional[datetime] = None
@@ -321,8 +299,6 @@ class StatusMessage(BaseModel):
 
 
 class StringPagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -350,8 +326,6 @@ class TableAction(Enum):
 
 
 class TestKeyfilePseudonymTemplateRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     sequenceNumber: Optional[int] = Field(
         None,
@@ -371,8 +345,6 @@ class TestKeyfilePseudonymTemplateRequest(BaseModel):
 
 
 class UpdateDataFieldRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the data field')
     value: constr(min_length=1, max_length=2048) = Field(
@@ -382,8 +354,6 @@ class UpdateDataFieldRequest(BaseModel):
 
 
 class UpdateDataHeaderRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     name: constr(min_length=3, max_length=128) = Field(
         ..., description='Name of the data header'
@@ -405,8 +375,6 @@ class UpdateDataHeaderRequest(BaseModel):
 
 
 class UpdateIdentityRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the identity to update')
     pseudonym: Optional[constr(max_length=512)] = Field(
@@ -419,8 +387,6 @@ class UpdateIdentityRequest(BaseModel):
 
 
 class UpdatePseudonymRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the identity to update')
     value: constr(min_length=1, max_length=512) = Field(..., description='New identity')
@@ -430,8 +396,6 @@ class UpdatePseudonymRequest(BaseModel):
 
 
 class UpdateUserRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[UUID] = Field(None, description='Primary key (AzureAD ObjectID)')
     enabled: Optional[bool] = Field(
@@ -448,8 +412,6 @@ class UserFields(Enum):
 
 
 class UserResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[UUID] = Field(None, description='Primary key (AzureAD ObjectID)')
     enabled: Optional[bool] = Field(
@@ -464,8 +426,6 @@ class UserResponse(BaseModel):
 
 
 class UserResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -481,8 +441,6 @@ class UserResponsePagedResults(BaseModel):
 
 
 class VersionInfo(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     from_: Optional[datetime] = Field(None, alias='from_')
     to: Optional[datetime] = None
@@ -497,8 +455,6 @@ class WebhookState(Enum):
 
 
 class ActivityResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary Key.')
     user: Optional[UserResponse] = None
@@ -529,8 +485,6 @@ class ActivityResponse(BaseModel):
 
 
 class ActivityResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -546,8 +500,6 @@ class ActivityResponsePagedResults(BaseModel):
 
 
 class CreateDataHeaderRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     name: constr(min_length=3, max_length=128) = Field(
         ..., description='Name of the data header'
@@ -568,8 +520,6 @@ class CreateDataHeaderRequest(BaseModel):
 
 
 class DataFieldResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the data field')
     headerID: Optional[int] = Field(None, description='Primary key of the data header')
@@ -579,8 +529,6 @@ class DataFieldResponse(BaseModel):
 
 
 class DataFieldResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -596,8 +544,6 @@ class DataFieldResponsePagedResults(BaseModel):
 
 
 class DataHeaderResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the data header')
     keyfileID: Optional[int] = Field(
@@ -617,8 +563,6 @@ class DataHeaderResponse(BaseModel):
 
 
 class DataHeaderResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -634,8 +578,6 @@ class DataHeaderResponsePagedResults(BaseModel):
 
 
 class JsonDataHeader(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     name: Optional[str] = None
     type: Optional[str] = None
@@ -644,8 +586,6 @@ class JsonDataHeader(BaseModel):
 
 
 class PseudonymIdentityResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(
         None,
@@ -671,8 +611,6 @@ class PseudonymIdentityResponse(BaseModel):
 
 
 class PseudonymIdentityResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -690,16 +628,12 @@ class PseudonymIdentityResponsePagedResults(BaseModel):
 
 
 class PseudonymisationResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     results: Optional[List[JsonDataHeader]] = None
     comments: Optional[str] = None
 
 
 class ReidentificationResult(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     pseudonyms: Optional[PseudonymIdentityResponsePagedResults] = None
     headers: Optional[List[DataHeaderResponse]] = Field(
@@ -708,8 +642,6 @@ class ReidentificationResult(BaseModel):
 
 
 class RoleDefinition(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     assignable: Optional[bool] = Field(None, description='Can the role be used?')
     id: Optional[UUID] = Field(None, description='Role defintion ID, unique identifier')
@@ -723,8 +655,6 @@ class RoleDefinition(BaseModel):
 
 
 class RoleDefinitionPagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -740,8 +670,6 @@ class RoleDefinitionPagedResults(BaseModel):
 
 
 class UpdateKeyfileRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of the keyfile')
     name: Optional[constr(min_length=3, max_length=128)] = Field(
@@ -784,8 +712,6 @@ class UpdateKeyfileRequest(BaseModel):
 
 
 class UserRoleResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = Field(None, description='Primary key of this role assignment')
     keyfileID: Optional[int] = Field(
@@ -800,8 +726,6 @@ class UserRoleResponse(BaseModel):
 
 
 class UserRoleResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -817,8 +741,6 @@ class UserRoleResponsePagedResults(BaseModel):
 
 
 class FileOptions(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     textCharacter: Optional[str] = None
     splitCharacter: Optional[str] = None
@@ -829,8 +751,6 @@ class FileOptions(BaseModel):
 
 
 class KeyfileResponse(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     id: Optional[int] = None
     name: Optional[str] = None
@@ -855,8 +775,6 @@ class KeyfileResponse(BaseModel):
 
 
 class KeyfileResponsePagedResults(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     page: Optional[int] = Field(None, description='Current page.')
     pageSize: Optional[int] = Field(None, description='Current page size.')
@@ -872,8 +790,6 @@ class KeyfileResponsePagedResults(BaseModel):
 
 
 class PseudonymisationRequest(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     fileOptions: FileOptions
     targetKeyfileID: Optional[int] = Field(
@@ -888,8 +804,6 @@ class PseudonymisationRequest(BaseModel):
 
 
 class DataSet(BaseModel):
-    class Config:
-        extra = Extra.forbid
 
     comment: Optional[str] = None
     countComplete: Optional[bool] = None
