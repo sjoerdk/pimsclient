@@ -1,4 +1,7 @@
 # History
+## 2.3.0 (2025-06-25)
+* Relaxes JSON type checking so that unknown fields no longer trigger exceptions. Fixes #295
+
 ## 2.2.0 (2025-06-02)
 * Moves from pydantic 1 to 2. Upgrades dependencies. Drops python 3.8
 
